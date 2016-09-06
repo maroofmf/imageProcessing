@@ -16,9 +16,13 @@ using namespace std;
 class imageData{
 public:
     imageData(FILE* file, int BytesPerPixel1, int imageWidth1, int imageHeight1);
+    imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1);
     void saveData(FILE* outputFileName);
     void imageRead();
     unsigned char accessPixelValue(int row, int column, int depth);
+    vector<unsigned char> getPixelValues();
+    void setPixelValues(vector<unsigned char> newPixelData);
+    void cropImage(imageData orignalImage,int cropRow,int cropColumn,int cropWidth,int cropHeight);
 
 private:
     FILE *inputFile;
