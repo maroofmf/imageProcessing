@@ -18,13 +18,14 @@ public:
     imageData(FILE* file, int BytesPerPixel1, int imageWidth1, int imageHeight1);
     void saveData(FILE* outputFileName);
     void imageRead();
+    unsigned char accessPixelValue(int row, int column, int depth);
 
 private:
     FILE *inputFile;
     int BytesPerPixel;
     int imageWidth;
     int imageHeight;
-    vector<unsigned char> pixelData;
+    vector<unsigned char>  pixelData;
 };
 
 #endif //CPP_IMAGEDATA_H
