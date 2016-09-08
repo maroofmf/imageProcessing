@@ -7,7 +7,8 @@ OBJS = main.o imageData.o
 cc = g++
 DEBUG = -g
 CFLAGS = -c
-ARGS = P1/Anna.raw test.raw 3 250 300
+ARGS1 = P1/Anna.raw test.raw 3 250 300
+ARGS = P1/Clownfish.raw colorSpace.raw 600 400 3
  
 p1_a_exe: $(OBJS)
 	@echo "Linking the code"
@@ -22,8 +23,7 @@ imageData.o: imageData.h imageData.cpp
 
 clean:
 	@echo "Cleaning folder by deleting object and executable files"
-	rm *.o p1_a_exe
-
+	rm *.o p1_a_exe  *.raw
 
 run:
 	@echo "Running the executable file"
