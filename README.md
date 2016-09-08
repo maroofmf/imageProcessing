@@ -8,7 +8,7 @@ cc = g++
 DEBUG = -g
 CFLAGS = -c
 ARGS1 = P1/Anna.raw test.raw 3 250 300
-ARGS = P1/Clownfish.raw colorSpace.raw 600 400 3
+ARGS = P1/Clownfish.raw colorSpace.raw 3 600 400
  
 p1_a_exe: $(OBJS)
 	@echo "Linking the code"
