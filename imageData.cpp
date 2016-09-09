@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <iterator>
+#include <math.h>
 #include "imageData.h"
 
 using namespace std;
@@ -92,6 +93,63 @@ imageData imageData::rgb2cmy(bool replaceColorSpaceFlag){
 }
 //----------------------------------------------------------------------------------------------------------------//
 // RGB to HSL:
+imageData imageData::rgb2hsl(bool replaceColorSpaceFlag){
+    imageData hslImage(BytesPerPixel,imageWidth,imageHeight);
+//TODO: Check the color space for image first!
+    hslImage.setPixelValues(pixelData);
+    double h_pixelValue,s_pixelValue, l_pixelValue, m_value, M_value, c_value, r_value,g_value, b_value;
+        for(int rowIndex=0; rowIndex<imageHeight;rowIndex++){
+            for(int columnIndex=0; columnIndex<imageWidth;columnIndex++){
+                r_value = accessPixelValue(rowIndex,columnIndex,0)/255.0;
+                g_value = accessPixelValue(rowIndex,columnIndex,1)/255.0;
+                b_value = accessPixelValue(rowIndex,columnIndex,2)/255.0;
+                M_value = max(max(r_value,g_value),b_value);
+                m_value = min(min(r_value,g_value),b_value);
+                c_value = M_value - m_value;
+
+                // Compute L value
+                l_pixelValue = (M_value+m_value)/2.0;
+
+                // Compute H Value
+                if(c_value==0){
+                    h_pixelValue = 0;
+                }else if(M_value==r_value){
+                    h_pixelValue = 60*(fmod(((g_value-b_value)/c_value),6));
+                }else if(M_value==g_value){
+                    h_pixelValue = 60*(((b_value-r_value)/c_value)+2);
+                }else if(M_value==b_value){
+                    h_pixelValue = 60*(((r_value-g_value)/c_value)+4);
+                }else{
+                    cout << "Couldn't compute h value in rgb2hsl" <<endl;
+                    exit(-2);
+                }
+
+                //Compute  S Value
+                if(l_pixelValue == 0){
+                    s_pixelValue =0;
+                }else if(l_pixelValue<0.5&&l_pixelValue>0){
+                    s_pixelValue = c_value/(2*l_pixelValue);
+                }else{
+                    s_pixelValue = c_value/(2-2*l_pixelValue);
+                }
+                // Renormalizing:
+                h_pixelValue = h_pixelValue*(255.0/360.0);
+                s_pixelValue = s_pixelValue*(255);
+                l_pixelValue = l_pixelValue*(255);
+
+                hslImage.setPixelValues((unsigned char)h_pixelValue,rowIndex,columnIndex,0);
+                hslImage.setPixelValues((unsigned char)s_pixelValue,rowIndex,columnIndex,1);
+                hslImage.setPixelValues((unsigned char)l_pixelValue,rowIndex,columnIndex,2);
+            }
+        }
+    if(replaceColorSpaceFlag){
+        pixelData = hslImage.getPixelValues();
+        return *this;
+    }else{
+        return(hslImage);
+    }
+}
+
 
 //----------------------------------------------------------------------------------------------------------------//
 // Convert each channel to grayscale:

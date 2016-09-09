@@ -5,12 +5,6 @@
 #ifndef CPP_IMAGEDATA_H
 #define CPP_IMAGEDATA_H
 
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include <vector>
-#include <string>
-
 using namespace std;
 
 class imageData{
@@ -25,6 +19,7 @@ public:
     void resizeImage(int newWidth, int newHeight);
     void cropImage(imageData orignalImage,int cropRow,int cropColumn,int cropWidth,int cropHeight);
     imageData rgb2cmy(bool replaceColorSpaceFlag);
+    imageData rgb2hsl(bool replaceColorSpaceFlag);
     vector<imageData> seperateChannels();
     unsigned char accessPixelValue(int row, int column, int depth);
     void saveImage(const char* outputFileName);
