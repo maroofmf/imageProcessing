@@ -4,7 +4,6 @@
 
 #ifndef CPP_IMAGEDATA_H
 #define CPP_IMAGEDATA_H
-
 using namespace std;
 
 class imageData{

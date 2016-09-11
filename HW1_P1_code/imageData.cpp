@@ -2,6 +2,7 @@
 // Created by Maroof Mohammed Farooq on 9/4/16.
 //
 
+// Header files
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 #include <math.h>
 #include "imageData.h"
 
+// Namespace
 using namespace std;
 
 //----------------------------------------------------------------------------------------------------------------//
@@ -31,12 +33,12 @@ vector<unsigned char> imageData::getPixelValues(){
     return(pixelData);
 }
 //----------------------------------------------------------------------------------------------------------------//
-// II. pixel values getter by row column and depth:
+// II. Pixel values getter by row column and depth:
 unsigned char imageData::getPixelValues(int row, int column, int depth){
     return(accessPixelValue(row,column,depth));
 }
 //----------------------------------------------------------------------------------------------------------------//
-// III. pixel values getter by index value:
+// III. Pixel values getter by index value:
 unsigned char imageData::getPixelValues(int index){
     return(pixelData[index]);
 }
@@ -62,58 +64,45 @@ imageData imageData::resizeImage(int newWidth, int newHeight){
     // Initilize an empty image
     imageData resizedImage(BytesPerPixel,newWidth,newHeight);
 
-    // initilize pixelValues to temporarily store retrieved pixel values
+    // initilize variable to temporarily store retrieved pixel values
     unsigned char pixelValue;
 
-    // Caluculate the resizing ratio
-    double ratio = (double)newWidth/imageWidth;
-
     // Fill the pixels into the resized image
+    // Check if iamge is being shrunk or enlarged
     if(newWidth<imageWidth){
-        for(double rowIndex=0; rowIndex<newHeight;rowIndex++) {
-            for (double columnIndex = 0; columnIndex < newWidth; columnIndex++) {
-                // R channel
-                pixelValue = accessPixelValue((int)ceil(rowIndex/ratio),(int)columnIndex/ratio,0 );
-                resizedImage.setPixelValues(pixelValue,rowIndex,columnIndex,0);
-                // G channel
-                pixelValue = accessPixelValue((int)ceil(rowIndex/ratio),(int)columnIndex/ratio,1);
-                resizedImage.setPixelValues(pixelValue,rowIndex,columnIndex,1);
-                // B channel
-                pixelValue = accessPixelValue((int)ceil(rowIndex/ratio),(int)columnIndex/ratio,2 );
-                resizedImage.setPixelValues(pixelValue,rowIndex,columnIndex,2);
+        // Caluculate the resizing ratio
+        double ratio = (double)newWidth/imageWidth;
+        for(int depthIndex=0; depthIndex< BytesPerPixel;depthIndex++ ){
+            for(double rowIndex=0; rowIndex<newHeight;rowIndex++) {
+                for (double columnIndex = 0; columnIndex < newWidth; columnIndex++) {
+                    // Copy values
+                    pixelValue = accessPixelValue((int)ceil(rowIndex/ratio),(int)columnIndex/ratio,depthIndex);
+                    resizedImage.setPixelValues(pixelValue,rowIndex,columnIndex,depthIndex);
+                }
             }
         }
     }else if(newWidth>imageWidth){
-        for(double rowIndex=0; rowIndex<imageHeight;rowIndex++) {
-            for (double columnIndex = 0; columnIndex < imageWidth; columnIndex++) {
-                // R channel
-                pixelValue = accessPixelValue(rowIndex,columnIndex,0);
-                resizedImage.setPixelValues(pixelValue,(int)ceil(rowIndex*ratio),(int)ceil(ratio*columnIndex),0);
-                // G channel
-                pixelValue = accessPixelValue(rowIndex,columnIndex,1);
-                resizedImage.setPixelValues(pixelValue,(int)ceil(rowIndex*ratio),(int)ceil(ratio*columnIndex),1);
-                // B channel
-                pixelValue = accessPixelValue(rowIndex,columnIndex,2);
-                resizedImage.setPixelValues(pixelValue,(int)ceil(rowIndex*ratio),(int)ceil(ratio*columnIndex),2);
+        // Caluculate the resizing ratio
+        double ratio = (double)imageWidth/newWidth;
+        for(int depthIndex=0; depthIndex< BytesPerPixel;depthIndex++ ){
+            for(double rowIndex=0; rowIndex<imageHeight;rowIndex++) {
+                for (double columnIndex = 0; columnIndex < imageWidth; columnIndex++) {
+//                    TODO: FIX THIS
+                    // map values
+//                    pixelValue = accessPixelValue(rowIndex,columnIndex,depthIndex);
+//                    resizedImage.setPixelValues(pixelValue,(int)ceil(rowIndex*ratio),(int)ceil(ratio*columnIndex),depthIndex);
+                }
             }
         }
-        
-
-
-
     }else{
         return(*this);
     }
-
-
     return(resizedImage);
-
 }
 //----------------------------------------------------------------------------------------------------------------//
 // Crop Image
 void imageData::cropImage(imageData orignalImage,int cropRow,int cropColumn,int cropWidth,int cropHeight){
     int index =0;
-
     for(int depthIndex=0; depthIndex<BytesPerPixel;depthIndex++){
         for(int rowIndex=0; rowIndex<imageHeight;rowIndex++){
             for(int columnIndex=0; columnIndex<imageWidth;columnIndex++){
@@ -126,8 +115,12 @@ void imageData::cropImage(imageData orignalImage,int cropRow,int cropColumn,int 
 //----------------------------------------------------------------------------------------------------------------//
 // RGB to CMY
 imageData imageData::rgb2cmy(bool replaceColorSpaceFlag){
+    // Check if the image is gray scale
+    if(BytesPerPixel < 3){
+        cout << "Cannot use color transform on grayscale images"<< endl;
+        exit(1);
+    }
     imageData cmyImage(BytesPerPixel,imageWidth,imageHeight);
-//TODO: Check the color space for image first!
     cmyImage.setPixelValues(pixelData);
     double pixelValue;
     for(int depthIndex=0; depthIndex<BytesPerPixel;depthIndex++){
@@ -140,7 +133,6 @@ imageData imageData::rgb2cmy(bool replaceColorSpaceFlag){
     }
     if(replaceColorSpaceFlag){
         pixelData = cmyImage.getPixelValues();
-//        delete cmyImage;
         return *this;
     }else{
         return(cmyImage);
@@ -149,8 +141,12 @@ imageData imageData::rgb2cmy(bool replaceColorSpaceFlag){
 //----------------------------------------------------------------------------------------------------------------//
 // RGB to HSL:
 imageData imageData::rgb2hsl(bool replaceColorSpaceFlag){
+
+    if(BytesPerPixel < 3){
+        cout << "Cannot use color transform on grayscale images"<< endl;
+        exit(1);
+    }
     imageData hslImage(BytesPerPixel,imageWidth,imageHeight);
-//TODO: Check the color space for image first!
     hslImage.setPixelValues(pixelData);
     double h_pixelValue,s_pixelValue, l_pixelValue, m_value, M_value, c_value, r_value,g_value, b_value;
         for(int rowIndex=0; rowIndex<imageHeight;rowIndex++){
