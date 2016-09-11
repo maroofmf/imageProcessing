@@ -1,0 +1,7 @@
+test
+*.out
+*.raw
+*.o
+p1_a_exe
+test.cpp
+
