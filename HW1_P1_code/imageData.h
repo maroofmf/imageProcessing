@@ -10,6 +10,9 @@ class imageData{
 public:
     imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1);
     ~imageData(void);
+    int getBytesPerPixel();
+    int getImageWidth();
+    int getImageHeight();
     vector<unsigned char> getPixelValues();
     unsigned char getPixelValues(int row, int column, int depth);
     unsigned char getPixelValues(int index);
@@ -21,6 +24,7 @@ public:
     imageData rgb2cmy(bool replaceColorSpaceFlag);
     imageData rgb2hsl(bool replaceColorSpaceFlag);
     vector<imageData> seperateChannels();
+    void concatenateChannels(vector<imageData> colorChannels);
     unsigned char accessPixelValue(int row, int column, int depth);
     void saveImage(const char* outputFileName);
     void imageRead(const char* inputFileName);

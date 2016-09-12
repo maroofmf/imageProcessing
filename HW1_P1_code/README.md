@@ -7,10 +7,11 @@ OBJS = main.o imageData.o imageAlgorithms.o
 cc = g++
 DEBUG = -g
 CFLAGS = -c
-ARGS = P1/Anna.raw annaout.raw 3 250 300
-ARGS1 = P2/Beach_dark.raw hist.raw 1 500 375
+ARGS1 = P1/Anna.raw annaout.raw 3 250 300
+ARGS4 = P2/Beach_bright.raw hist.raw 1 500 375
 ARGS2 = P1/Clownfish.raw colorSpace.raw 3 600 400
 ARGS3 = P1/Turtle.raw hsvspace.raw 3 400 250 
+ARGS = P2/Skyline.raw out.raw 3 600 400
 
 hw1_exe: $(OBJS)
 	@echo "Linking the code"

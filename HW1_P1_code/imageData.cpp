@@ -28,6 +28,21 @@ imageData::imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1){
 imageData::~imageData(void){
 }
 //----------------------------------------------------------------------------------------------------------------//
+// Image Bytes per pixel getter:
+int imageData::getBytesPerPixel(){
+    return(BytesPerPixel);
+}
+//----------------------------------------------------------------------------------------------------------------//
+// Image Width getter:
+int imageData::getImageWidth(){
+    return(imageWidth);
+}
+//----------------------------------------------------------------------------------------------------------------//
+// Image Height getter:
+int imageData::getImageHeight(){
+    return(imageHeight);
+}
+//----------------------------------------------------------------------------------------------------------------//
 // I. All pixel values getter:
 vector<unsigned char> imageData::getPixelValues(){
     return(pixelData);
@@ -87,8 +102,7 @@ imageData imageData::resizeImage(int newWidth, int newHeight){
         for(int depthIndex=0; depthIndex< BytesPerPixel;depthIndex++ ){
             for(double rowIndex=0; rowIndex<imageHeight;rowIndex++) {
                 for (double columnIndex = 0; columnIndex < imageWidth; columnIndex++) {
-//                    TODO: FIX THIS
-                    // map values
+
 //                    pixelValue = accessPixelValue(rowIndex,columnIndex,depthIndex);
 //                    resizedImage.setPixelValues(pixelValue,(int)ceil(rowIndex*ratio),(int)ceil(ratio*columnIndex),depthIndex);
                 }
@@ -112,6 +126,9 @@ void imageData::cropImage(imageData orignalImage,int cropRow,int cropColumn,int 
         }
     }
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Crop Image
+
 //----------------------------------------------------------------------------------------------------------------//
 // RGB to CMY
 imageData imageData::rgb2cmy(bool replaceColorSpaceFlag){
@@ -229,7 +246,27 @@ vector<imageData> imageData::seperateChannels(){
 
     return decomposedChannels;
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Combine channels to form color image:
+void imageData::concatenateChannels(vector<imageData> colorChannels) {
 
+    unsigned char redValue;
+    unsigned char greenValue;
+    unsigned char blueValue;
+
+    for(int rowIndex=0; rowIndex<imageHeight;rowIndex++) {
+        for (int columnIndex = 0; columnIndex < imageWidth; columnIndex++) {
+
+            redValue = colorChannels[0].getPixelValues(rowIndex,columnIndex,0);
+            greenValue = colorChannels[1].getPixelValues(rowIndex,columnIndex,0);
+            blueValue = colorChannels[2].getPixelValues(rowIndex,columnIndex,0);
+            setPixelValues(redValue,rowIndex,columnIndex,0);
+            setPixelValues(greenValue,rowIndex,columnIndex,1);
+            setPixelValues(blueValue,rowIndex,columnIndex,2);
+
+        }
+    }
+}
 //----------------------------------------------------------------------------------------------------------------//
 // Access image data 3d to 1d
 // rows: 0--(imageHeight-1)
