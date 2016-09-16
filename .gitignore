@@ -1,7 +1,6 @@
-P1
-*.out
-*.raw
-*.o
-p1_a_exe
+test
+*.out 
+*.raw 
+*.o 
+p1_a_exe 
 test.cpp
-
