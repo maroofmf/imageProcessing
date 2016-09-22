@@ -4,4 +4,8 @@ test
 *.o
 p1_a_exe
 test.cpp
-
+*.out 
+*.raw 
+*.o 
+p1_a_exe 
+test.cpp

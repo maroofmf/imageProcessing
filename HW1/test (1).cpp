@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include <map>
-#include <math.h>
 using namespace std;
+
+void fun(char* a){
+    cout << a <<endl;
+}
 
 int main(){
 
@@ -59,11 +61,10 @@ int main(){
 //        cout << (int)a << endl;
 //    }
 
-    vector<double> a;
-    a.push_back(2.2);
-    a.push_back(2.5);
-    double b = *max_element(a.begin(),a.end());
-    cout << b << endl;
 
+    int a=10,b=7;
+    double c = (double)a/b;
+//    double d = max(max(a,b),c);
+    cout << c <<endl;
     return 0;
 }

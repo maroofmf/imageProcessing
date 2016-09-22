@@ -24,6 +24,7 @@ public:
     imageData extendImage(int extendBy);
     imageData rgb2cmy(bool replaceColorSpaceFlag);
     imageData rgb2hsl(bool replaceColorSpaceFlag);
+    imageData hsl2rgb(bool replaceColorSpaceFlag);
     vector<imageData> seperateChannels();
     void concatenateChannels(vector<imageData> colorChannels);
     unsigned char accessPixelValue(int row, int column, int depth);

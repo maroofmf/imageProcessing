@@ -1,15 +1,32 @@
+############################### Description ###############################
+# EE 569 Homework 1
+# Date: 18 September 2016
 # Name: Maroof Mohammed Farooq 
 # USCID : 7126869945 
-#
+# Email : maroofmf@usc.edu
+# Operating System: OSX El Capitan -v 10.11.6
+# Compiler: g++
 
-# Macros for makefile
+############################# README #########################################
+# (1)  All the input image folders (P1,P2,P3) from the question should be included 
+#      seperately in the source folder. Please note that the paths for images are passed to
+#      the program.
+#
+# (2) To compile and run the program: make -f README.md
+#
+# (3) To clean all the folders and object files in the folder run: make -f README.md clean
+#
+# (4) The output images will be stored in the folder with names based on the question number.
+#     Please change the arguments if new test images are used. 
+
+################################ Macros ######################################
 OBJS = main.o imageData.o imageAlgorithms.o
 cc = g++
 DEBUG = -g
 CFLAGS = -c
-OUTPUTFOLDERS = p1_a_output p1_b_output p2_a_output p2_b_output p2_c_output p2_d_output p3_a_output
+OUTPUTFOLDERS = p1_a_output p1_b_output p2_a_output p2_b_output p2_c_output p2_d_output p3_a_output p3_b_output
 
-# Arguments for problem 1 part a
+################################### Aruguments #################################
 # Format of arguments: inputImagePath outputImageName BytesPerPixel imageWidth imageHeight problemNumber cropRow cropColumn cropWidth cropHeight 
 ARGS1 = P1/Anna.raw annaOut 3 250 300 1 66 40 150 150
 ARGS2 = P1/Rebel.raw rebelOut 3 200 300 1 28 33 150 150
@@ -25,7 +42,13 @@ ARGS11 = P2/Park.raw parkOut 3 259 194 6
 ARGS12 = P2/Student_1.raw student_1_out 1 500 332 7
 ARGS13 = P2/Student_2.raw student_2_out 1 500 375 7
 ARGS14 = P3/Lena.raw lenaOut 3 512 512 8 P3/Lena_noisy.raw 
+ARGS15 = P3/Buildings.raw buildingsOut 3 512 512 8 P3/Buildings_noisy.raw 
+ARGS16 = P3/Trees.raw treesOut 3 774 518 8 P3/Trees_noisy.raw 
+ARGS17 = P3/Lena.raw lenaOut 3 512 512 9 P3/Lena_noisy.raw 
+ARGS18 = P3/Buildings.raw buildingsOut 3 512 512 9 P3/Buildings_noisy.raw 
+ARGS19 = P3/Trees.raw treesOut 3 774 518 9 P3/Trees_noisy.raw 
 
+################################ Code Execution and Linking ##################
 all: hw1_exe run	
 
 hw1_exe: $(OBJS)
@@ -67,3 +90,10 @@ run:
 	./hw1_exe $(ARGS12)
 	./hw1_exe $(ARGS13)
 	./hw1_exe $(ARGS14)
+	./hw1_exe $(ARGS15)
+	./hw1_exe $(ARGS16)
+	./hw1_exe $(ARGS17)
+	./hw1_exe $(ARGS18)
+	./hw1_exe $(ARGS19)
+	
+############################### END ################################################

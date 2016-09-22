@@ -315,7 +315,70 @@ imageData imageData::rgb2hsl(bool replaceColorSpaceFlag){
         return(hslImage);
     }
 }
+//----------------------------------------------------------------------------------------------------------------//
+// HSL to RGB:
+imageData imageData::hsl2rgb(bool replaceColorSpaceFlag) {
+    if (BytesPerPixel < 3) {
+        cout << "Cannot use color transform on grayscale images" << endl;
+        exit(1);
+    }
+    imageData rgbImage(BytesPerPixel, imageWidth, imageHeight);
+    rgbImage.setPixelValues(pixelData);
+    double h_pixelValue, s_pixelValue, l_pixelValue, m_value, x_value, c_value, r_value, g_value, b_value;
+    for (int rowIndex = 0; rowIndex < imageHeight; rowIndex++) {
+        for (int columnIndex = 0; columnIndex < imageWidth; columnIndex++) {
+            h_pixelValue = accessPixelValue(rowIndex, columnIndex, 0) * (360.0 / 255.0);
+            s_pixelValue = accessPixelValue(rowIndex, columnIndex, 1) * (1.0 / 255.0);
+            l_pixelValue = accessPixelValue(rowIndex, columnIndex, 2) * (1.0 / 255.0);
 
+            c_value = (1 - fabs(2.0 * l_pixelValue - 1.0)) * s_pixelValue;
+            x_value = c_value * (1.0 - fabs(fmod((h_pixelValue / 60.0), 2.0) - 1));
+            m_value = l_pixelValue - c_value / 2.0;
+
+            if (h_pixelValue >= 0 && h_pixelValue < 60) {
+                r_value = c_value;
+                g_value = x_value;
+                b_value = 0;
+            } else if(h_pixelValue >= 60 && h_pixelValue < 120){
+                r_value = x_value;
+                g_value = c_value;
+                b_value = 0;
+            }else if(h_pixelValue >= 120 && h_pixelValue < 180){
+                r_value = 0;
+                g_value = c_value;
+                b_value = x_value;
+            }else if(h_pixelValue >= 180 && h_pixelValue < 240){
+                r_value = 0;
+                g_value = x_value;
+                b_value = c_value;
+            }else if(h_pixelValue >= 240 && h_pixelValue < 300){
+                r_value = x_value;
+                g_value = 0;
+                b_value = c_value;
+            }else if(h_pixelValue >= 300 && h_pixelValue < 360){
+                r_value = c_value;
+                g_value = 0;
+                b_value = x_value;
+            }
+
+            r_value = (unsigned char)(255.0*(r_value+m_value));
+            g_value = (unsigned char)(255.0*(g_value+m_value));
+            b_value = (unsigned char)(255.0*(b_value+m_value));
+
+            rgbImage.setPixelValues((unsigned char)r_value,rowIndex,columnIndex,0);
+            rgbImage.setPixelValues((unsigned char)g_value,rowIndex,columnIndex,1);
+            rgbImage.setPixelValues((unsigned char)b_value,rowIndex,columnIndex,2);
+        }
+    }
+
+    if(replaceColorSpaceFlag){
+        pixelData = rgbImage.getPixelValues();
+        return *this;
+    }else{
+        return(rgbImage);
+    }
+
+}
 
 //----------------------------------------------------------------------------------------------------------------//
 // Convert each channel to grayscale:

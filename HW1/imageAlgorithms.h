@@ -16,6 +16,9 @@ public:
     void equalizationBasedOnReference(imageData referenceObject);
     void histEqualization_gaussian(double mean, double std);
     void psnr(imageData originalImage);
+    void meanFilter(int windowSize);
+    void medianFilter(int windowSize);
+    void NLMFilter(int windowSize, int searchWindowSize, double decayFactor);
 
 
 private:
