@@ -1,10 +1,6 @@
 test
-*.out
-*.raw
-*.o
-p1_a_exe
-test.cpp
-*.out 
+HW1/*.out *.raw *.o p1_a_exe test.cpp
+HW2/*.out 
 *.raw 
 *.o 
 p2_a_exe 
