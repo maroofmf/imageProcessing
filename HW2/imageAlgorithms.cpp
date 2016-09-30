@@ -595,34 +595,119 @@ void imageAlgorithms::fourLevelDithering(){
 void imageAlgorithms::errorDiffusion(string algorithm){
 
     // Local Variables
-    double thresholdValue;
     int imageHeight = imageObject->getImageHeight();
     int imageWidth = imageObject->getImageWidth();
     int BytesPerPixel = imageObject->getBytesPerPixel();
+    imageData extendedImage;
     imageData ditheredImage(BytesPerPixel,imageWidth,imageHeight);
-    unsigned char pixelValue;
+    matrix<int,double> errorDiffusionMatrix;
+    int oldPixelValue, newPixelValue, tempPixelValue;
+    int pixelDiff;
+    int threshold = 127;
+    int extendBy;
+
 
     if(algorithm=="floyd-steinberg"){
-        matrix<int,double> errorDiffussionMatrix(3,3,1);
-        errorDiffussionMatrix.setMatrixByValues(9,0,0,0,0,0,7,3,5,1);
-        errorDiffussionMatrix.multiplyEachValueBy(1/16.0);
+        // Set values for diffusion matrix
+        errorDiffusionMatrix.setMatrixDimentions(3,3,1);
+        errorDiffusionMatrix.setMatrixByValues(9,0.0,0.0,0.0,0.0,0.0,7.0,3.0,5.0,1.0);
+        errorDiffusionMatrix.multiplyEachValueBy(1/16.0);
+        // Extend image
+        extendBy = 1;
 
     }else if(algorithm=="JJN"){
-        matrix<int,double> errorDiffussionMatrix(5,5,1);
-        errorDiffussionMatrix.setMatrixByValues(25,0,0,0,0,0,0,0,0,0,0,0,0,0,7,5,3,5,7,5,3,1,3,5,3,1);
-        errorDiffussionMatrix.multiplyEachValueBy(1/48.0);
+        // Set values for diffusion matrix
+        errorDiffusionMatrix.setMatrixDimentions(5,5,1);
+        errorDiffusionMatrix.setMatrixByValues(25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,7.0,5.0,3.0,5.0,7.0,5.0,3.0,1.0,3.0,5.0,3.0,1.0);
+        errorDiffusionMatrix.multiplyEachValueBy(1/48.0);
+        // Extend image
+        extendBy = 2;
 
 
     }else if(algorithm=="stucki"){
-        matrix<int,double> errorDiffussionMatrix(5,5,1);
-        errorDiffussionMatrix.setMatrixByValues(25,0,0,0,0,0,0,0,0,0,0,0,0,0,7,5,3,5,7,5,3,1,3,5,3,1);
-        errorDiffussionMatrix.multiplyEachValueBy(1/42.0);
+        // Set values for diffusion matrix
+        errorDiffusionMatrix.setMatrixDimentions(5,5,1);
+        errorDiffusionMatrix.setMatrixByValues(25,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,7.0,5.0,3.0,5.0,7.0,5.0,3.0,1.0,3.0,5.0,3.0,1.0);
+        errorDiffusionMatrix.multiplyEachValueBy(1/42.0);
+        // Extend image
+        extendBy = 2;
     }
 
+    extendedImage = imageObject->extendImage(extendBy);
 
+    // Serpentine scanning:
+    int matrixSize = errorDiffusionMatrix.getHeight();
+    int columnIndexStart=0, columnIndexEnd=imageWidth;
 
+    for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
+        for(int columnIndex = columnIndexStart; columnIndex < columnIndexEnd; columnIndex++){
+
+            // Get pixel value
+            oldPixelValue = extendedImage.getPixelValues(rowIndex+extendBy,abs(columnIndex)+extendBy,0);
+            newPixelValue = ((oldPixelValue < threshold)?0:255);
+            pixelDiff = oldPixelValue - newPixelValue;
+
+            // Set pixel value
+            ditheredImage.setPixelValues((unsigned char)newPixelValue,rowIndex,abs(columnIndex),0);
+
+            // Error Diffusion
+            if(((rowIndex+1)%2 == 0)||(rowIndex==0)){
+
+                for(int filterRowIndex = 0; filterRowIndex < matrixSize; filterRowIndex++){
+                    for(int filterColumnIndex = 0; filterColumnIndex < matrixSize; filterColumnIndex++){
+
+                        tempPixelValue = extendedImage.getPixelValues(rowIndex+filterRowIndex,abs(columnIndex)+filterColumnIndex,0);
+                        tempPixelValue = tempPixelValue + floor(((double)pixelDiff)*errorDiffusionMatrix.getMatrixValues(filterRowIndex,filterColumnIndex,0));
+
+                        if(tempPixelValue<0){
+                            tempPixelValue = 0;
+                        } else if(tempPixelValue>255){
+                            tempPixelValue = 255;
+                        }
+
+                        extendedImage.setPixelValues((unsigned char)tempPixelValue,rowIndex+filterRowIndex,abs(columnIndex)+filterColumnIndex,0);
+                    }
+                }
+
+            }else{
+                for(int filterRowIndex = 0; filterRowIndex < matrixSize; filterRowIndex++){
+                    for(int filterColumnIndex = 0; filterColumnIndex < matrixSize; filterColumnIndex++){
+
+                        tempPixelValue = extendedImage.getPixelValues(rowIndex+filterRowIndex,abs(columnIndex)+filterColumnIndex,0);
+                        tempPixelValue = tempPixelValue + floor((double)pixelDiff*(errorDiffusionMatrix.getMatrixValues(filterRowIndex,matrixSize-filterColumnIndex-1,0)));
+
+                        if(tempPixelValue<0){
+                            tempPixelValue = 0;
+                        } else if(tempPixelValue>255){
+                            tempPixelValue = 255;
+                        }
+
+                        extendedImage.setPixelValues((unsigned char)tempPixelValue,rowIndex+filterRowIndex,abs(columnIndex)+filterColumnIndex,0);
+                    }
+                }
+
+            }
+        }
+
+        // Check if row index is even
+        if((rowIndex+1)%2 == 0){
+            columnIndexStart = 0;
+            columnIndexEnd = imageWidth;
+        }else{
+            columnIndexStart = -imageWidth + 1;
+            columnIndexEnd = 1;
+        }
+
+    }
+
+    imageObject->setPixelValues(ditheredImage.getPixelValues());
 
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image Warping:
+
+
 
 
 

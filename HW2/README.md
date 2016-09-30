@@ -24,19 +24,21 @@ OBJS = main.o imageData.o imageAlgorithms.o matrix.o
 cc = g++
 DEBUG = -g
 CFLAGS = -c
-OUTPUTFOLDERS = p2_a_output p2_b_output
+OUTPUTFOLDERS = p2_a_output p2_b_output p1_a_output p1_b_output p1_c_output
 
 ################################### Aruguments #################################
 # Format of arguments: inputImagePath outputImageName BytesPerPixel imageWidth imageHeight problemNumber *additional problem parameters*
 
 ARGS1 = HW\ 2\ images/house.raw houseOut 1 512 512 2
+ARGS2 = HW\ 2\ images/Kitten_1.raw kitten_1_out 3 300 300 1
+ARGS3 = HW\ 2\ images/Kitten_2.raw kitten_2_out 3 300 300 1
 
 ################################ Code Execution and Linking ##################
-all: hw1_exe run	
+all: hw2_exe run	
 
-hw1_exe: $(OBJS)
+hw2_exe: $(OBJS)
 	@echo "Linking the code"
-	$(cc) $(OBJS) -o hw1_exe
+	$(cc) $(OBJS) -o hw2_exe
 
 main.o: main.cpp
 	@echo "Compiling main.cpp in progress"
@@ -53,7 +55,7 @@ matrix.o: matrix.h matrix.cpp
 clean:
 	@echo "Cleaning folder by deleting object and executable files"
 	rm -rf $(OUTPUTFOLDERS)
-	rm -rf *.o hw1_exe  *.raw *.out 
+	rm -rf *.o hw2_exe  *.raw *.out 
 	
 
 run:
@@ -61,6 +63,8 @@ run:
 	rm -rf $(OUTPUTFOLDERS)
 	@echo "Running the executable files"
 	mkdir $(OUTPUTFOLDERS)
-	./hw1_exe $(ARGS1)
+	./hw2_exe $(ARGS1)
+	./hw2_exe $(ARGS2)
+	#./hw2_exe $(ARGS3)
 	
 ############################### END ################################################

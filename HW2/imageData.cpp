@@ -17,6 +17,8 @@
 // Namespace
 using namespace std;
 
+// Static variables
+
 //----------------------------------------------------------------------------------------------------------------//
 // Image constructor I: Used to initialize a black image
 imageData::imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1){
@@ -24,7 +26,17 @@ imageData::imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1){
     imageWidth = imageWidth1;
     imageHeight = imageHeight1;
     pixelData.resize(imageHeight*imageWidth*BytesPerPixel,0);
+
+    // Coordinate conversion
+    static const double dataArray[9] = {0.0,1.0,0.5,-1,0.0,imageHeight-0.5,0.0,0.0,1.0};
+    copy(&dataArray[0],&dataArray[9], back_inserter(pixelCoordinateConversion));
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image constructor II: Default initializer
+imageData::imageData(){
+}
+
 //----------------------------------------------------------------------------------------------------------------//
 // Destructor
 imageData::~imageData(void){
@@ -430,6 +442,61 @@ void imageData::concatenateChannels(vector<imageData> colorChannels) {
         }
     }
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Image coordinate to x,y coordinate:
+vector<double> imageData::imageToCartesian(double pixelRow, double pixelColumn){
+
+    // Initialize matrices
+    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> imageCoordinates(3,1,1);
+    matrix<int,double> cartesianCoordinates(3,1,1);
+
+    // Set matrix values
+    transformer.setMatrixValues(pixelCoordinateConversion);
+    imageCoordinates.setMatrixByValues(3,pixelRow,pixelColumn,1.0);
+
+    transformer.printMatrix();
+    // Calculate cartetian value
+    cartesianCoordinates = transformer.multiplyWith(imageCoordinates);
+
+    // Return matrix vector
+    return cartesianCoordinates.getMatrixValues();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// x,y to image coordinate:
+vector<double> imageData::cartesianToImage(double x, double y){
+
+    // Initialize matrices
+    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> imageCoordinates(3,1,1);
+    matrix<int,double> cartesianCoordinates(3,1,1);
+
+    // Set transformer values
+    transformer.setMatrixValues(pixelCoordinateConversion);
+    transformer = transformer.pseudoInverse();
+
+    cartesianCoordinates.setMatrixByValues(3,x,y,1.0);
+
+    // Calculate image index value
+    imageCoordinates = transformer.multiplyWith(cartesianCoordinates);
+
+    // Return matrix vector
+    return imageCoordinates.getMatrixValues();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Return pixel values from x,y coordinate:
+
+unsigned char imageData::getPixelValuesFrom_xy(double x, double y){
+
+    vector<double> imageCoordinates = cartesianToImage(x,y);
+    return accessPixelValue(imageCoordinates[0],imageCoordinates[1],0);
+
+}
+
 //----------------------------------------------------------------------------------------------------------------//
 // Access image data 3d to 1d
 // rows: 0--(imageHeight-1)

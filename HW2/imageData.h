@@ -4,11 +4,13 @@
 
 #ifndef CPP_IMAGEDATA_H
 #define CPP_IMAGEDATA_H
+
 using namespace std;
 
 class imageData{
 public:
     imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1);
+    imageData();
     ~imageData(void);
     int getBytesPerPixel();
     int getImageWidth();
@@ -27,6 +29,11 @@ public:
     imageData hsl2rgb(bool replaceColorSpaceFlag);
     vector<imageData> seperateChannels();
     void concatenateChannels(vector<imageData> colorChannels);
+
+    vector<double> imageToCartesian(double pixelRow, double pixelColumn);
+    vector<double> cartesianToImage(double x, double y);
+    unsigned char getPixelValuesFrom_xy(double x, double y);
+
     unsigned char accessPixelValue(int row, int column, int depth);
     void saveImage(const char* outputFileName);
     void imageRead(const char* inputFileName);
@@ -36,6 +43,7 @@ private:
     int imageWidth;
     int imageHeight;
     vector<unsigned char>  pixelData;
+    vector<double> pixelCoordinateConversion;
 };
 
 #endif //CPP_IMAGEDATA_H
