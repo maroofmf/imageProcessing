@@ -137,6 +137,30 @@ indexDataType matrix<indexDataType,valueDataType>::getDepth(){
 }
 
 //----------------------------------------------------------------------------------------------------------------//
+// Trace of matrix:
+template <class indexDataType, class valueDataType>
+double matrix<indexDataType,valueDataType>::trace(matrix<indexDataType,valueDataType> inputMatrix){
+
+    // Local Variables
+    double traceValue = 0;
+    int matrixSize = inputMatrix.getWidth();
+
+    // Check if the matrix is square:
+    if((matrixSize!=inputMatrix.getHeight())||(inputMatrix.getDepth()!=1)){
+        cout<< "Wrong matrix size for calculating trace "<<endl;
+        exit(-2);
+    }
+
+    // Calculate trace of a matrix
+    for(int index = 0; index < matrixSize; index++) {
+        traceValue += inputMatrix.getMatrixValues(index,index,0);
+    }
+
+    return traceValue;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
 // Determinant of matrix:
 template <class indexDataType, class valueDataType>
 double matrix<indexDataType,valueDataType>::determinant(matrix<indexDataType,valueDataType> inputMatrix) {
@@ -249,7 +273,6 @@ matrix<indexDataType,valueDataType> matrix<indexDataType,valueDataType>::pseudoI
 
 }
 
-
 //----------------------------------------------------------------------------------------------------------------//
 // Matrix Transpose
 template <class indexDataType, class valueDataType>
@@ -307,12 +330,82 @@ matrix<indexDataType,valueDataType> matrix<indexDataType,valueDataType>::multipl
 }
 
 //----------------------------------------------------------------------------------------------------------------//
+// Operator overload ==
+
+template <class indexDataType, class valueDataType>
+bool matrix<indexDataType,valueDataType>::operator==(matrix<indexDataType,valueDataType> otherMatrix){
+
+    bool same = 0;
+    vector<valueDataType> otherMatrixData = otherMatrix.getMatrixValues();
+
+    if((matWidth!=otherMatrix.getWidth())||(matHeight!=otherMatrix.getHeight())||(matDepth!=otherMatrix.getDepth())){
+        return same;
+    }
+
+    for(int index = 0; index<matData.size(); index++){
+
+        if(otherMatrixData[index] != matData[index]){
+            return same;
+        }
+    }
+
+    same = 1;
+    return same;
+
+}
+
+
+//----------------------------------------------------------------------------------------------------------------//
+// Operator overload !=
+
+template <class indexDataType, class valueDataType>
+bool matrix<indexDataType,valueDataType>::operator!=(matrix<indexDataType,valueDataType> otherMatrix){
+
+    bool same = 1;
+    vector<valueDataType> otherMatrixData = otherMatrix.getMatrixValues();
+
+    if((matWidth!=otherMatrix.getWidth())||(matHeight!=otherMatrix.getHeight())||(matDepth!=otherMatrix.getDepth())){
+        return same;
+    }
+
+    for(int index = 0; index<matData.size(); index++){
+
+        if(otherMatrixData[index] != matData[index]){
+            return same;
+        }
+    }
+
+    same = 0;
+    return same;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Count number of non zero elements
+
+template <class indexDataType, class valueDataType>
+int matrix<indexDataType,valueDataType>::countNumberOfNonZero(){
+
+    int count = 0;
+
+    for(int index = 0; index<matData.size(); index++){
+
+        if(matData[index]>0){
+            count++;
+        }
+    }
+
+    return count;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
 // Multiply each element by
 template <class indexDataType, class valueDataType>
 void matrix<indexDataType,valueDataType>::multiplyEachValueBy(valueDataType value){
 
     for(int index = 0; index<matData.size(); index++){
-        matData[index] *= value;
+        matData[index] = matData[index]*value;
     }
 }
 
@@ -361,4 +454,4 @@ template class matrix<int,int>;
 template class matrix<int,double>;
 template class matrix<int,float>;
 template class matrix<int,long>;
-
+template class matrix<int,bool>;

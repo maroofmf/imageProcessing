@@ -29,9 +29,12 @@ OUTPUTFOLDERS = p2_a_output p2_b_output p1_a_output p1_b_output p1_c_output
 ################################### Aruguments #################################
 # Format of arguments: inputImagePath outputImageName BytesPerPixel imageWidth imageHeight problemNumber *additional problem parameters*
 
-ARGS1 = HW\ 2\ images/house.raw houseOut 1 512 512 2
+ARGS1 = HW\ 2\ images/house.raw houseOut 1 512 512 4
 ARGS2 = HW\ 2\ images/Kitten_1.raw kitten_1_out 3 300 300 1
 ARGS3 = HW\ 2\ images/Kitten_2.raw kitten_2_out 3 300 300 1
+ARGS4 = HW\ 2\ images/piece.raw piece_out 3 500 500 2 HW\ 2\ images/Hillary.raw HW\ 2\ images/Trump.raw 3 512 512
+ARGS5 = HW\ 2\ images/field.raw field_out 3 972 648 3 HW\ 2\ images/tartans.raw HW\ 2\ images/trojans.raw 3 350 146
+ARGS6 = HW\ 2\ images/Rice.raw rice_out 3 690 500 5
 
 ################################ Code Execution and Linking ##################
 all: hw2_exe run	
@@ -65,6 +68,9 @@ run:
 	mkdir $(OUTPUTFOLDERS)
 	./hw2_exe $(ARGS1)
 	./hw2_exe $(ARGS2)
-	#./hw2_exe $(ARGS3)
+	./hw2_exe $(ARGS3)
+	./hw2_exe $(ARGS4)
+	./hw2_exe $(ARGS5)
+	./hw2_exe $(ARGS6)
 	
 ############################### END ################################################

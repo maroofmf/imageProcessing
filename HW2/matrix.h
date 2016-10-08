@@ -28,12 +28,18 @@ public:
     indexDataType getHeight();
     indexDataType getDepth();
 
+    double trace(matrix<indexDataType,valueDataType> inputMatrix);
     double determinant(matrix<indexDataType,valueDataType> inputMatrix);
     matrix<indexDataType,valueDataType> cofactorMatrix(matrix<indexDataType,valueDataType> inputMatrix,indexDataType row, indexDataType column);
     matrix<indexDataType,valueDataType> adjoint(matrix<indexDataType,valueDataType> inputMatrix);
     matrix<indexDataType,valueDataType> pseudoInverse();
     matrix<indexDataType,valueDataType> transpose();
     matrix<indexDataType,valueDataType> multiplyWith(matrix<indexDataType,valueDataType> otherMatrix);
+
+    bool operator==(matrix<indexDataType,valueDataType> otherMatrix);
+    bool operator!=(matrix<indexDataType,valueDataType> otherMatrix);
+
+    int countNumberOfNonZero();
 
     void multiplyEachValueBy(valueDataType value);
     valueDataType accessMatrixValue(indexDataType row,indexDataType column,indexDataType depth);

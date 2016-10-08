@@ -17,8 +17,6 @@
 // Namespace
 using namespace std;
 
-// Static variables
-
 //----------------------------------------------------------------------------------------------------------------//
 // Image constructor I: Used to initialize a black image
 imageData::imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1){
@@ -27,11 +25,16 @@ imageData::imageData(int BytesPerPixel1, int imageWidth1, int imageHeight1){
     imageHeight = imageHeight1;
     pixelData.resize(imageHeight*imageWidth*BytesPerPixel,0);
 
-    // Coordinate conversion
-    static const double dataArray[9] = {0.0,1.0,0.5,-1,0.0,imageHeight-0.5,0.0,0.0,1.0};
-    copy(&dataArray[0],&dataArray[9], back_inserter(pixelCoordinateConversion));
-}
+    // Initialize
+    const double dataArray[9] = {0.0, 1.0, 0.5, -1, 0.0, imageHeight - 0.5, 0.0, 0.0, 1.0};
+    copy(&dataArray[0], &dataArray[9], back_inserter(toCartesianVector));
 
+    // Initialize to image vector
+    matrix<int,double> toImageMatrix(3,3,1);
+    toImageMatrix.setMatrixValues(toCartesianVector);
+    toImageMatrix = toImageMatrix.pseudoInverse();
+    toImageVector = toImageMatrix.getMatrixValues();
+}
 //----------------------------------------------------------------------------------------------------------------//
 // Image constructor II: Default initializer
 imageData::imageData(){
@@ -57,6 +60,17 @@ int imageData::getImageHeight(){
     return(imageHeight);
 }
 //----------------------------------------------------------------------------------------------------------------//
+// Cartesian vector converter getter:
+vector<double> imageData::getToCartesianVector(){
+    return toCartesianVector;
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image vector converter getter:
+vector<double> imageData::getToImageVector(){
+    return toImageVector;
+}
+//----------------------------------------------------------------------------------------------------------------//
 // I. All pixel values getter:
 vector<unsigned char> imageData::getPixelValues(){
     return(pixelData);
@@ -71,6 +85,18 @@ unsigned char imageData::getPixelValues(int row, int column, int depth){
 unsigned char imageData::getPixelValues(int index){
     return(pixelData[index]);
 }
+//----------------------------------------------------------------------------------------------------------------//
+// III. Pixel values getter by index value:
+void imageData::setToCartesianVector(vector<double> newToCartesianVector){
+    toCartesianVector = newToCartesianVector;
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// III. Pixel values getter by index value:
+void imageData::setToImageVector(vector<double> newToImageVector){
+    toImageVector = newToImageVector;
+}
+
 //----------------------------------------------------------------------------------------------------------------//
 // I. Pixel value setter: Set values of all the pixels at once
 void imageData::setPixelValues(vector<unsigned char> newPixelData){
@@ -442,22 +468,225 @@ void imageData::concatenateChannels(vector<imageData> colorChannels) {
         }
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Color to grayscale transform:
+imageData imageData::colorToGrayscale(){
+
+    if(BytesPerPixel!=3){
+        cout<< "Cannot convert to grayscale. Please check the input" <<endl;
+        exit(-1);
+    }
+
+    // Local variables
+    imageData grayScaleImage(1,imageWidth,imageHeight);
+    unsigned  char pixelValue;
+
+    // Convert to grayscale
+    for(int rowIndex=0; rowIndex<imageHeight;rowIndex++){
+        for(int columnIndex=0; columnIndex<imageWidth;columnIndex++){
+
+            pixelValue = (unsigned char)(0.299*(double)accessPixelValue(rowIndex,columnIndex,0) + 0.587*(double)accessPixelValue(rowIndex,columnIndex,1) + 0.114*(double)accessPixelValue(rowIndex,columnIndex,2));
+            grayScaleImage.setPixelValues(pixelValue,rowIndex,columnIndex,0);
+
+        }
+    }
+
+    return grayScaleImage;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image Diamond Warping:
+unsigned char imageData::diamondWarping(double x, double y, unsigned char defaultBackgroundValue){
+
+    // Initialize all warping matrices
+    static matrix<int,double> diamondWarpingMatrix1(3,3,1);
+    diamondWarpingMatrix1.setMatrixByValues(9,2.0,0.0,-150.5,-1.0,1.0,150.5,0.0,0.0,1.0); // Found from matlab
+    static matrix<int,double> diamondWarpingMatrix2(3,3,1);
+    diamondWarpingMatrix2.setMatrixByValues(9,2.0135,0.0,-152.5338,1.0135,1.0000,-152.5338,0.0,0.0,1.0);
+    static matrix<int,double> diamondWarpingMatrix3(3,3,1);
+    diamondWarpingMatrix3.setMatrixByValues(9,1.0,1.0135,-152.5338,0.00, 2.0135,-152.5338,0.0,0.0,1.0000);
+    static matrix<int,double> diamondWarpingMatrix4(3,3,1);
+    diamondWarpingMatrix4.setMatrixByValues(9,1.0000,-1.0000,150.5000,0.0000,2.0000,-150.5000,0.0,0.0,1.0000);
+    static matrix<int,double> diamondWarpingMatrix5(3,3,1);
+    diamondWarpingMatrix5.setMatrixByValues(9,2.0135,0.0,-152.5338,-1.0135,1.0000,152.5338,0.00,0.0,1.0000);
+    static matrix<int,double> diamondWarpingMatrix6(3,3,1);
+    diamondWarpingMatrix6.setMatrixByValues(9,2.0000,0.0,-150.5000,1.0000,1.0000,-150.5000,0.0000,0.0,1.0000);
+    static matrix<int,double> diamondWarpingMatrix7(3,3,1);
+    diamondWarpingMatrix7.setMatrixByValues(9,1.0000,1.0000,-150.5000,0.0,2.0000,-150.5000,0.0,0.0000,1.0000);
+    static matrix<int,double> diamondWarpingMatrix8(3,3,1);
+    diamondWarpingMatrix8.setMatrixByValues(9,1.0000,-1.0135,152.5338,0.0,2.0135,-152.5338,0.0,0.0000,1.0000);
+
+    // Initialize output and input coordinates:
+    vector<double> outputCartesianCoordinates;
+    matrix<int,double> inputCartesianCoordinates(3,1,1);
+    inputCartesianCoordinates.setMatrixByValues(3,x,y,1.0);
+
+    // Generate hypothesis value
+    double yNormalized = y-150.5;
+    double xNormalized = x-150.5;
+    double hypothesisValue = (atan((yNormalized)/(xNormalized)))*(180.0/M_PI);
+
+    if((xNormalized<0)&&(yNormalized>=0)){
+        hypothesisValue +=180;
+    } else if((xNormalized<0)&&(yNormalized<0)){
+        hypothesisValue +=180;
+    } else if((xNormalized>=0)&&(yNormalized<0)){
+        hypothesisValue += 360;
+    }
+
+    // Applying suitable transformation matrix
+    if((hypothesisValue<=135)&&(hypothesisValue>=90)){
+        outputCartesianCoordinates = (diamondWarpingMatrix1.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    } else if((hypothesisValue<=90)&&(hypothesisValue>=45)){
+        outputCartesianCoordinates = (diamondWarpingMatrix2.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=45)&&(hypothesisValue>=0)){
+        outputCartesianCoordinates = (diamondWarpingMatrix3.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=360)&&(hypothesisValue>=315)){
+        outputCartesianCoordinates = (diamondWarpingMatrix4.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=315)&&(hypothesisValue>=270)){
+        outputCartesianCoordinates = (diamondWarpingMatrix5.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=270)&&(hypothesisValue>=225)){
+        outputCartesianCoordinates = (diamondWarpingMatrix6.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=225)&&(hypothesisValue>=180)){
+        outputCartesianCoordinates = (diamondWarpingMatrix7.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else if((hypothesisValue<=180)&&(hypothesisValue>=135)){
+        outputCartesianCoordinates = (diamondWarpingMatrix8.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+    }else{
+        outputCartesianCoordinates = inputCartesianCoordinates.getMatrixValues();
+    }
+
+    return getPixelValuesFrom_xy(outputCartesianCoordinates[0],outputCartesianCoordinates[1],0);
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Puzzle matching 1
+unsigned char imageData::puzzleMatching1(double x, double y,imageData* piecesImage,unsigned char defaultBackgroundValue){
+
+    // Static variables
+    static matrix<int,double> mapping_puzzle1(3,3,1);
+    mapping_puzzle1.setMatrixByValues(9,1.3861,0.3762,-283.1485,-0.3812,1.3911,-17.8589,-0.0000,0.0000,1.0000);
+
+    // Local variables
+    vector<double> outputCartesianCoordinates;
+    matrix<int,double> inputCartesianCoordinates(3,1,1);
+    inputCartesianCoordinates.setMatrixByValues(3,x,y,1.0);
+
+    // Calculate output coordinates
+    vector<double> outputCartesianCoordinate = (mapping_puzzle1.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+
+    return piecesImage->getPixelValuesFrom_xy(outputCartesianCoordinate[0],outputCartesianCoordinate[1],0);
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Puzzle matching 2
+unsigned char imageData::puzzleMatching2(double x, double y, imageData* piecesImage,unsigned char defaultBackgroundValue){
+
+    // Static variables
+    static matrix<int,double> mapping_puzzle2(3,3,1);
+    mapping_puzzle2.setMatrixByValues(9,-0.0594,-0.7030,514.8812,0.6980,-0.0644,33.3540,-0.0000,-0.0000,1.0000);
+
+    // Local variables
+    vector<double> outputCartesianCoordinates;
+    matrix<int,double> inputCartesianCoordinates(3,1,1);
+    inputCartesianCoordinates.setMatrixByValues(3,x,y,1.0);
+
+    // Calculate output coordinates
+    vector<double> outputCartesianCoordinate = (mapping_puzzle2.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+
+    return piecesImage->getPixelValuesFrom_xy(outputCartesianCoordinate[0],outputCartesianCoordinate[1],0);
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image overlay 1:
+unsigned char imageData::textEmbedding1(double x, double y, imageData* textImage,unsigned char defaultBackgroundValue){
+
+    // Static variables
+    static matrix<int,double> mapping_text1(3,3,1);
+    mapping_text1.setMatrixByValues(9,0.0684,0.8874,-66.3633,-0.6006,0.4089,304.3954,0.0001 ,-0.0028, 1.0);
+
+    // Local variables
+    vector<double> outputCartesianCoordinates;
+    matrix<int,double> inputCartesianCoordinates(3,1,1);
+    inputCartesianCoordinates.setMatrixByValues(3,x,y,1.0);
+
+    // Calculate output coordinates
+    vector<double> outputCartesianCoordinate = (mapping_text1.multiplyWith(inputCartesianCoordinates)).getMatrixValues();
+
+    return textImage->getPixelValuesFrom_xy(outputCartesianCoordinate[0]/outputCartesianCoordinate[2],outputCartesianCoordinate[1]/outputCartesianCoordinate[2],defaultBackgroundValue);
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image Translation:
+void imageData::translation(double delta_x ,double delta_y){
+
+    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> translationMatrix(3,3,1);
+
+    transformer.setMatrixValues(toCartesianVector);
+    translationMatrix.setMatrixByValues(9,1.0,0.0,delta_x,0.0,1.0,delta_y,0.0,0.0,1.0);
+
+    translationMatrix = translationMatrix.multiplyWith(transformer);
+
+    toCartesianVector = translationMatrix.getMatrixValues();
+    toImageVector = (translationMatrix.pseudoInverse()).getMatrixValues();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image Rotation:
+
+void imageData::rotation(double theta){
+
+    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> rotationMatrix(3,3,1);
+
+    transformer.setMatrixValues(toCartesianVector);
+    rotationMatrix.setMatrixByValues(9,cos(M_PI*theta/180.0),-sin(M_PI*theta/180.0),0.0,sin(M_PI*theta/180.0),cos(M_PI*theta/180.0),0.0,0.0,0.0,1.0);
+
+    rotationMatrix = rotationMatrix.multiplyWith(transformer);
+
+    toCartesianVector = rotationMatrix.getMatrixValues();
+    toImageVector = (rotationMatrix.pseudoInverse()).getMatrixValues();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Image Scaling:
+
+void imageData::scaling(double xScaleFactor, double yScaleFactor){
+
+    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> scalingMatrix(3,3,1);
+
+    transformer.setMatrixValues(toCartesianVector);
+    scalingMatrix.setMatrixByValues(9,xScaleFactor,0.0,0.0,0.0,yScaleFactor,0.0,0.0,0.0,1.0);
+
+    scalingMatrix = scalingMatrix.multiplyWith(transformer);
+
+    toCartesianVector = scalingMatrix.getMatrixValues();
+    toImageVector = (scalingMatrix.pseudoInverse()).getMatrixValues();
+
+}
+
 //----------------------------------------------------------------------------------------------------------------//
 // Image coordinate to x,y coordinate:
 vector<double> imageData::imageToCartesian(double pixelRow, double pixelColumn){
 
     // Initialize matrices
-    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> toCartesianMatrix(3,3,1);
     matrix<int,double> imageCoordinates(3,1,1);
     matrix<int,double> cartesianCoordinates(3,1,1);
 
     // Set matrix values
-    transformer.setMatrixValues(pixelCoordinateConversion);
+    toCartesianMatrix.setMatrixValues(toCartesianVector);
     imageCoordinates.setMatrixByValues(3,pixelRow,pixelColumn,1.0);
 
-    transformer.printMatrix();
     // Calculate cartetian value
-    cartesianCoordinates = transformer.multiplyWith(imageCoordinates);
+    cartesianCoordinates = toCartesianMatrix.multiplyWith(imageCoordinates);
 
     // Return matrix vector
     return cartesianCoordinates.getMatrixValues();
@@ -469,18 +698,18 @@ vector<double> imageData::imageToCartesian(double pixelRow, double pixelColumn){
 vector<double> imageData::cartesianToImage(double x, double y){
 
     // Initialize matrices
-    matrix<int,double> transformer(3,3,1);
+    matrix<int,double> toImageMatrix(3,3,1);
     matrix<int,double> imageCoordinates(3,1,1);
     matrix<int,double> cartesianCoordinates(3,1,1);
 
     // Set transformer values
-    transformer.setMatrixValues(pixelCoordinateConversion);
-    transformer = transformer.pseudoInverse();
+    toImageMatrix.setMatrixValues(toImageVector);
+//    transformer = transformer.pseudoInverse();
 
     cartesianCoordinates.setMatrixByValues(3,x,y,1.0);
 
     // Calculate image index value
-    imageCoordinates = transformer.multiplyWith(cartesianCoordinates);
+    imageCoordinates = toImageMatrix.multiplyWith(cartesianCoordinates);
 
     // Return matrix vector
     return imageCoordinates.getMatrixValues();
@@ -490,10 +719,33 @@ vector<double> imageData::cartesianToImage(double x, double y){
 //----------------------------------------------------------------------------------------------------------------//
 // Return pixel values from x,y coordinate:
 
-unsigned char imageData::getPixelValuesFrom_xy(double x, double y){
+unsigned char imageData::getPixelValuesFrom_xy(double x, double y, unsigned char defaultBackgroundValue){
 
+    // Local Variables
     vector<double> imageCoordinates = cartesianToImage(x,y);
-    return accessPixelValue(imageCoordinates[0],imageCoordinates[1],0);
+    double intPart;
+
+    // Check if the access is beyond the indices
+    if((imageCoordinates[0]>=imageHeight)||(imageCoordinates[1]>=imageWidth)||(imageCoordinates[0]<0)||(imageCoordinates[1]<0)){
+        return defaultBackgroundValue;
+    }
+
+    // Check if the coordinates are at the edges
+    else if((ceil(imageCoordinates[0])>=imageHeight-1)||(ceil(imageCoordinates[1])>=imageWidth-1)){
+        return accessPixelValue(imageCoordinates[0],imageCoordinates[1],0);
+    }
+
+    // Check if the coordinates are fractional. Apply bilinear interpolation if so.
+    else if((modf(imageCoordinates[0],&intPart)!=0)||(modf(imageCoordinates[1],&intPart)!=0)){
+        imageAlgorithms interpolateValues(this);
+        unsigned char pixelValue;
+        pixelValue = interpolateValues.bilinearInterpolation(imageCoordinates[0],imageCoordinates[1],0.0);
+        return pixelValue;
+    }
+    // Else return the accessed values.
+    else{
+        return accessPixelValue(imageCoordinates[0],imageCoordinates[1],0);
+    }
 
 }
 
