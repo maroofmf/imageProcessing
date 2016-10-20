@@ -1,4 +1,4 @@
-**Image Processing**
+##**Image Processing**
 
 This repository contains image processing algorithms implemented as a   
 part of EE 569 - Introduction to Digital image processing at USC.  
