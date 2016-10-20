@@ -28,7 +28,6 @@ ARGS18 = P3/Buildings.raw buildingsOut 3 512 512 9 P3/Buildings_noisy.raw
 ARGS19 = P3/Trees.raw treesOut 3 774 518 9 P3/Trees_noisy.raw
 
 # Code execution and running
-
 all: hw1_exe run
 
 hw1_exe: $(OBJS)
