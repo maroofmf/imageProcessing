@@ -1,8 +1,3 @@
+*.o
+*.txt
 test
-HW1/*.out *.raw *.o p1_a_exe test.cpp
-HW2/*.out 
-*.raw 
-*.o 
-p2_a_exe 
-test.cpp
-HW\ 2\ images
