@@ -761,6 +761,29 @@ unsigned char imageData::accessPixelValue(int row, int column, int depth){
     }
     return(pixelData[row*imageWidth*BytesPerPixel+column*BytesPerPixel+depth]);
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Save binary Image:
+
+void imageData::saveBinaryImage(const char* outputFileName){
+    FILE* outputFile;
+    if (!(outputFile=fopen(outputFileName,"wb"))) {
+        cout << "Cannot open file: " << outputFileName << endl;
+        exit(1);
+    }
+
+    // Convert binary to unsigned char
+    vector<unsigned char> convertedPixelData(imageWidth*imageHeight*BytesPerPixel,0);
+
+    for(int index = 0; index < convertedPixelData.size(); index++){
+        convertedPixelData[index] = 255*((unsigned char)pixelData[index]);
+    }
+
+    fwrite(&convertedPixelData[0], sizeof(unsigned char), imageWidth*imageHeight*BytesPerPixel, outputFile);
+    fclose(outputFile);
+}
+
+
 //----------------------------------------------------------------------------------------------------------------//
 // Load image from file
 void imageData::imageRead(const char* inputFileName){

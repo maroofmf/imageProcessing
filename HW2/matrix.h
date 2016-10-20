@@ -38,10 +38,14 @@ public:
 
     bool operator==(matrix<indexDataType,valueDataType> otherMatrix);
     bool operator!=(matrix<indexDataType,valueDataType> otherMatrix);
+    matrix<indexDataType,valueDataType> operator!();
+    matrix<indexDataType,valueDataType> operator|(matrix<indexDataType,valueDataType> otherMatrix);
 
     int countNumberOfNonZero();
 
     void multiplyEachValueBy(valueDataType value);
+    void zeroPad(indexDataType padBy);
+    void removeZeroPadding(indexDataType paddedBy);
     valueDataType accessMatrixValue(indexDataType row,indexDataType column,indexDataType depth);
     void printMatrix();
 

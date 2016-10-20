@@ -551,7 +551,6 @@ void imageAlgorithms::dithering(int indexMatrixSize,bool useGivenMatrix){
         bayerIndexMat = givenMat;
     }
 
-
     // Calculate threshold matrix
     for(int rowIndex=0; rowIndex< indexMatrixSize; rowIndex++){
         for(int columnIndex = 0; columnIndex < indexMatrixSize; columnIndex++){
@@ -1014,9 +1013,14 @@ matrix<int,bool> imageAlgorithms::charToBoolean(){
 matrix<int,unsigned char> imageAlgorithms::booleanToChar(matrix<int,bool> inputMatrix){
 
     // Init local variables
-    int imageHeight = imageObject->getImageHeight();
-    int imageWidth = imageObject->getImageWidth();
-    int BytePerPixels = imageObject->getBytesPerPixel();
+//    int imageHeight = imageObject->getImageHeight();
+//    int imageWidth = imageObject->getImageWidth();
+//    int BytePerPixels = imageObject->getBytesPerPixel();
+
+    int imageHeight = inputMatrix.getHeight();
+    int imageWidth = inputMatrix.getWidth();
+    int BytePerPixels = inputMatrix.getDepth();
+
     matrix<int,unsigned char> pixelValueMatrix(imageHeight,imageWidth,1);
     unsigned char pixelValue;
 
@@ -1267,9 +1271,9 @@ map<int,vector<int> > imageAlgorithms::harrisCornerDetector(double RThreshold){
 }
 
 //----------------------------------------------------------------------------------------------------------------//
-// Shrinking algorithm:
+// Morphological algorithm:
 
-matrix<int,bool> imageAlgorithms::shrinking(matrix<int,bool> binaryImageData){
+matrix<int,bool> imageAlgorithms::morphologicalAlgorithms(matrix<int,bool> binaryImageData, string operation){
 
     // Local parameters
     int matrixHeight = binaryImageData.getHeight();
@@ -1283,10 +1287,18 @@ matrix<int,bool> imageAlgorithms::shrinking(matrix<int,bool> binaryImageData){
     bool postValue = 0;
     bool firstIteration = 1;
 
+    // Check if the operation specified is correct!
+    if((operation!="Shrinking")&&((operation!="Thinning"))&&((operation!="Skeletonizing"))){
+        cout<< "Please specify the correct operation for morphological Algorithms" <<endl;
+        exit(0);
+    }
+
+
+
     while(postShrinking!=preShrinking){
 
         if(!firstIteration){
-            preShrinking = postShrinking;
+            preShrinking.setMatrixValues(postShrinking.getMatrixValues());
         }
         firstIteration = 0;
 
@@ -1303,8 +1315,9 @@ matrix<int,bool> imageAlgorithms::shrinking(matrix<int,bool> binaryImageData){
                 }
 
                 // Get all neighbouring pixels
-                int bitSetter = 0x001;
+                int bitSetter = 0x100;
                 bool bitValue = 0;
+                windowBitStream = 0;
 
                 for(int windowRowIndex = -1; windowRowIndex<2;windowRowIndex++){
                     for(int windowColumnIndex = -1; windowColumnIndex < 2;windowColumnIndex++){
@@ -1315,13 +1328,14 @@ matrix<int,bool> imageAlgorithms::shrinking(matrix<int,bool> binaryImageData){
                             windowBitStream |= bitSetter;
                         }
 
-                        bitSetter = bitSetter <<1;
+                        bitSetter = bitSetter >> 1;
 
                     }
                 }
 
+
                 // Check the conditional pattern
-                mValue = conditionalPatternMatching("Shrinking",windowBitStream);
+                mValue = conditionalPatternMatching(operation,windowBitStream);
 
                 // Set mValue for intermediate matrix
                 intermediateMatrix.setMatrixValues(mValue,rowIndex,columnIndex,0);
@@ -1341,31 +1355,31 @@ matrix<int,bool> imageAlgorithms::shrinking(matrix<int,bool> binaryImageData){
                 }
 
                 // Get all neighbouring pixels
-                int bitSetter = 0x001;
+                int bitSetter = 0x100;
                 bool bitValue = 0;
+                windowBitStream = 0;
 
                 for(int windowRowIndex = -1; windowRowIndex<2;windowRowIndex++){
                     for(int windowColumnIndex = -1; windowColumnIndex < 2;windowColumnIndex++){
                         bitValue = intermediateMatrix.getMatrixValues(rowIndex+windowRowIndex,columnIndex+windowColumnIndex,0);
+
                         if(bitValue){
                             windowBitStream |= bitSetter;
                         }
-                        bitSetter = bitSetter <<1;
+                        bitSetter = bitSetter >>1;
                     }
                 }
 
                 // Check the conditional pattern
-                postValue = unconditionalPatternMatching("Shrinking",windowBitStream);
+                postValue = unconditionalPatternMatching(operation,windowBitStream);
 
-                // Set mValue for intermediate matrix
-                postShrinking.setMatrixValues(mValue,rowIndex,columnIndex,0);
+                // Set postValue for postShrinking matrix
+                postShrinking.setMatrixValues(postValue,rowIndex,columnIndex,0);
 
             }
         }
 
-
     }
-
 
     return postShrinking;
 
@@ -1564,35 +1578,108 @@ bool imageAlgorithms::unconditionalPatternMatching(string operation,int obtained
                              0b110111011
     };
 
+    static int unconditionalPatterns_skel_withoutD[]={0b000010001,0b000010100,0b001010000,0b100010000, // Spur
+                               0b000010010,0b000011000,0b000110000,0b010010000, // Single 4-connection
+                               0b010011000,0b010110000,0b000011010,0b000110010// LCorner
+    };
+
+    static int unconditionalPatterns_skel_withD[]={
+            0b110110000,// Corner Cluster
+            0b000011011,
+            0b010111000,// Tee Branch
+            0b010110010,
+            0b000111010,
+            0b010011010,
+            0b101010001,0b101010010,0b101010011,0b101010100,0b101010101,0b101010110,0b101010111,// Vee Branch
+            0b100010101,0b100011100,0b100011101,0b101010100,0b101010101,0b101011100,0b101011101,
+            0b001010101,0b010010101,0b011010101,0b100010101,0b101010101,0b110010101,0b111010101,
+            0b001010101,0b001110001,0b001110101,0b101010001,0b101010101,0b101110001,0b101110101,
+            0b010011100,// Diagonal Branch
+            0b010110001,
+            0b001110010,
+            0b100011010,
+    };
+
+    static int unconditionalMask_skel[]={
+                            0b110110000,// Corner Cluster
+                            0b000011011,
+                            0b010111000,// Tee Branch
+                            0b010110010,
+                            0b000111010,
+                            0b010011010,
+                            0b101010111,0b101010111,0b101010111,0b101010111,0b101010111,0b101010111,0b101010111,// Vee Branch
+                            0b101011111,0b101011111,0b101011111,0b101011111,0b101011111,0b101011111,0b101011111,
+                            0b111010101,0b111010101,0b111010101,0b111010101,0b111010101,0b111010101,0b111010101,
+                            0b101110101,0b101110101,0b101110101,0b101110101,0b101110101,0b101110101,0b101110101,
+                            0b011111110,// Diagonal Branch
+                            0b110111011,
+                            0b011111110,
+                            0b110111011
+    };
+
+
+    // For thinning and shrinking
     static vector<int> unconditionalPatternsWithoutD_vec(unconditionalPatternsWithoutD, unconditionalPatternsWithoutD + sizeof(unconditionalPatternsWithoutD) / sizeof(unconditionalPatternsWithoutD[0]));
     static vector<int> unconditionalPatternsWithD_vec(unconditionalPatternsWithD, unconditionalPatternsWithD + sizeof(unconditionalPatternsWithD) / sizeof(unconditionalPatternsWithD[0]));
     static vector<int> mask_shrink_thinning_vec(mask_shrink_thinning, mask_shrink_thinning + sizeof(mask_shrink_thinning) / sizeof(mask_shrink_thinning[0]));
     static map<int,int> hitPatternsMap = hitMapDeveloper(unconditionalPatternsWithD_vec,unconditionalPatternsWithoutD_vec);
-    static map<int,int> maskMap = maskMapDeveloper(mask_shrink_thinning_vec);
+    static map<int,vector<int> > maskMap = maskMapDeveloper(mask_shrink_thinning_vec,unconditionalPatternsWithD_vec);
+
+
+    // For skeletonizing:
+    static vector<int> unconditionalPatternsWithoutD_skeletonize_vec(unconditionalPatterns_skel_withoutD, unconditionalPatterns_skel_withoutD + sizeof(unconditionalPatterns_skel_withoutD) / sizeof(unconditionalPatterns_skel_withoutD[0]));
+    static vector<int> unconditionalPatternsWithD_skeletonize_vec(unconditionalPatterns_skel_withD, unconditionalPatterns_skel_withD + sizeof(unconditionalPatterns_skel_withD) / sizeof(unconditionalPatterns_skel_withD[0]));
+    static vector<int> mask_skeletonize_vec(unconditionalMask_skel, unconditionalMask_skel + sizeof(unconditionalMask_skel) / sizeof(unconditionalMask_skel[0]));
+    static map<int,int> hitPatternsMap_skeletonize = hitMapDeveloper(unconditionalPatternsWithoutD_skeletonize_vec,unconditionalPatternsWithD_skeletonize_vec);
+    static map<int,vector<int> > maskMap_skeletonize = maskMapDeveloper(mask_skeletonize_vec,unconditionalPatternsWithD_skeletonize_vec);
 
 
     // Check for patterns
     bool hitOrMiss = 0;
     int maskedPattern = 0;
 
+    // Check for shrinking or thinning
+
     if((operation=="Shrinking")||(operation=="Thinning")){
 
         if(hitPatternsMap[obtainedPattern]==1){
             hitOrMiss = 1;
-            return hitOrMiss;
+        }else{
+
+            // Else try different masks!
+            for(int index = 0; index< maskMap.size(); index++){
+
+                maskedPattern = maskMap[index][0]&obtainedPattern;
+                // Check if masked pattern is available in dictionary
+                if(maskedPattern == maskMap[index][1]){
+                    hitOrMiss = 1;
+                    break;
+                }
+
+            }
         }
 
-        // Else try different masks!
-        for(int index = 0; index< maskMap.size(); index++){
+    }
 
-            maskedPattern = maskMap[index]&obtainedPattern;
+    // Check for skeletonizing
 
-            // Check if masked pattern is available in dictionary
-            if(hitPatternsMap[maskedPattern] == 1){
-                hitOrMiss = 1;
-                return 1;
+    if(operation=="Skeletonizing"){
+
+        if(hitPatternsMap_skeletonize[obtainedPattern]==1){
+            hitOrMiss = 1;
+        }else{
+
+            // Else try different masks!
+            for(int index = 0; index< maskMap_skeletonize.size(); index++){
+
+                maskedPattern = maskMap_skeletonize[index][0]&obtainedPattern;
+                // Check if masked pattern is available in dictionary
+                if(maskedPattern == maskMap_skeletonize[index][1]){
+                    hitOrMiss = 1;
+                    break;
+                }
+
             }
-
         }
 
     }
@@ -1605,7 +1692,7 @@ bool imageAlgorithms::unconditionalPatternMatching(string operation,int obtained
 // Private method to build hit pattern map
 map<int,int> imageAlgorithms::hitMapDeveloper(vector<int> patternValues1,vector<int> patternValues2){
 
-    static map<int,int> hitMap;
+    map<int,int> hitMap;
 
     // Fill it in with hit patterns
     for(int index = 0; index<patternValues1.size();index++){
@@ -1621,19 +1708,19 @@ map<int,int> imageAlgorithms::hitMapDeveloper(vector<int> patternValues1,vector<
 
 //----------------------------------------------------------------------------------------------------------------//
 // Private method to build mask map
-map<int,int> imageAlgorithms::maskMapDeveloper(vector<int> maskValues){
+map<int,vector<int> > imageAlgorithms::maskMapDeveloper(vector<int> maskValues, vector<int> patternValues1){
 
-    static map<int,int> maskMap;
+    map<int,vector<int> > maskMap;
 
     // Fill it in with hit patterns
     for(int index = 0; index<maskValues.size();index++){
-        maskMap[index] = maskValues[index];
+        maskMap[index].push_back(maskValues[index]);
+        maskMap[index].push_back(patternValues1[index]);
     }
 
     return maskMap;
 
 }
-
 
 //----------------------------------------------------------------------------------------------------------------//
 // Private method to determine the bound of a pattern
@@ -1663,6 +1750,303 @@ int imageAlgorithms::bound(int obtainedPattern){
     return boundValue;
 }
 
+//----------------------------------------------------------------------------------------------------------------//
+// Hole filling algorithm:
+
+matrix<int,bool> imageAlgorithms::holeFilling(){
+
+    // Local variables
+    int imageWidth = imageObject->getImageWidth();
+    int imageHeight = imageObject->getImageHeight();
+    matrix<int,bool> inputMatrix = charToBoolean();
+    matrix<int,bool> seedMatrix(imageHeight,imageWidth,1);
+    seedMatrix.setMatrixValues(1,0,0,0);
+
+    // Dilate the background
+    matrix<int,bool> dilatedMatrix = dilation_holeFilling(seedMatrix,inputMatrix);
+
+    // Find the holes in the image
+    matrix<int,bool> holesMatrix = !(inputMatrix|dilatedMatrix);
+    matrix<int,bool> outputMatrix = inputMatrix|holesMatrix;
+
+    return outputMatrix;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Dilation for hole filling:
+
+matrix<int,bool> imageAlgorithms::dilation_holeFilling(matrix<int,bool> seedMatrix, matrix<int,bool> inputMatrix){
+
+    // Define the structuring matrix:
+    int imageWidth = imageObject->getImageWidth();
+    int imageHeight = imageObject->getImageHeight();
+    matrix<int,bool> structuringMatrix(3,3,1);
+    structuringMatrix.setMatrixByValues(9,0,1,0,1,1,1,0,1,0);
+    matrix<int,bool> outputMatrix(imageHeight,imageWidth,1);
+    int firstIteration = 1;
+    bool outputValue = 0;
+
+    while(outputMatrix!=seedMatrix){
+
+        if(!firstIteration){
+            seedMatrix = outputMatrix;
+        }
+        firstIteration = 0;
+
+        // Iter through all the elements in seed Image
+        for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
+            for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
 
 
+                if(!inputMatrix.getMatrixValues(rowIndex,columnIndex,0)){
+
+                    // Iterate through all the elements in the window:
+                    outputValue = 0;
+                    for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
+                        for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
+
+                            // Check for out of bound indices
+                            if((windowRowIndex+rowIndex<0)||(windowColumnIndex+columnIndex<0)||(windowColumnIndex+columnIndex>=imageWidth)||(rowIndex+windowRowIndex>=imageHeight)){
+                                continue;
+                            }
+
+                            //Calculate output value
+                            outputValue |= (structuringMatrix.getMatrixValues(windowRowIndex+1,windowColumnIndex+1,0) & seedMatrix.getMatrixValues(windowRowIndex+rowIndex,windowColumnIndex+columnIndex,0));
+
+                        }
+                    }
+
+                    outputMatrix.setMatrixValues(outputValue,rowIndex,columnIndex,0);
+
+                }
+            }
+        }
+
+    }
+
+    return outputMatrix;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Dilation:
+
+matrix<int,bool> imageAlgorithms::dilation(matrix<int,bool> inputMatrix, int numberOfIter){
+
+    // Local variables
+    int matHeight = inputMatrix.getHeight();
+    int matWidth = inputMatrix.getWidth();
+    matrix<int,bool> outputMatrix(matHeight,matWidth,1);
+    matrix<int,bool> dilationKernel(3,3,1);
+    dilationKernel.setMatrixByValues(9,0,1,0,1,1,1,0,1,0);
+    int outputValue = 0;
+    int firstIteration = 1;
+
+
+    // Apply kernel for number of iter times
+    for(int iter = 0; iter< numberOfIter; iter++){
+
+        if(!firstIteration){
+            inputMatrix = outputMatrix;
+        }
+        firstIteration = 0;
+
+        for(int rowIndex = 0; rowIndex < matHeight; rowIndex++){
+            for(int columnIndex = 0; columnIndex < matWidth; columnIndex++){
+
+                // Iterate through all the elements in the window:
+                outputValue = 0;
+                for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
+                    for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
+
+                        // Check for out of bound indices
+                        if((windowRowIndex+rowIndex<0)||(windowColumnIndex+columnIndex<0)||(windowColumnIndex+columnIndex>=matWidth)||(rowIndex+windowRowIndex>=matHeight)){
+                            continue;
+                        }
+
+                        //Calculate output value
+                        outputValue |= (dilationKernel.getMatrixValues(windowRowIndex+1,windowColumnIndex+1,0) & inputMatrix.getMatrixValues(windowRowIndex+rowIndex,windowColumnIndex+columnIndex,0));
+                    }
+                }
+
+                outputMatrix.setMatrixValues(outputValue,rowIndex,columnIndex,0);
+
+            }
+        }
+
+    }
+
+    return outputMatrix;
+
+}
+
+
+//----------------------------------------------------------------------------------------------------------------//
+// Erosion:
+
+matrix<int,bool> imageAlgorithms::erosion(matrix<int,bool> inputMatrix, int numberOfIter){
+
+    // Local variables
+    int matHeight = inputMatrix.getHeight();
+    int matWidth = inputMatrix.getWidth();
+    matrix<int,bool> outputMatrix(matHeight,matWidth,1);
+    matrix<int,bool> erosionKernel(3,3,1);
+    erosionKernel.setMatrixByValues(9,1,1,1,1,1,1,1,1,1);
+    int outputValue = 1;
+    int firstIteration = 1;
+
+
+    // Apply kernel for number of iter times
+    for(int iter = 0; iter< numberOfIter; iter++){
+
+        if(!firstIteration){
+            inputMatrix = outputMatrix;
+        }
+        firstIteration = 0;
+
+        for(int rowIndex = 0; rowIndex < matHeight; rowIndex++){
+            for(int columnIndex = 0; columnIndex < matWidth; columnIndex++){
+
+                // Iterate through all the elements in the window:
+                outputValue = 1;
+                for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
+                    for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
+
+                        // Check for out of bound indices
+                        if((windowRowIndex+rowIndex<0)||(windowColumnIndex+columnIndex<0)||(windowColumnIndex+columnIndex>=matWidth)||(rowIndex+windowRowIndex>=matHeight)){
+                            continue;
+                        }
+
+                        //Calculate output value
+                        outputValue &= (erosionKernel.getMatrixValues(windowRowIndex+1,windowColumnIndex+1,0) & inputMatrix.getMatrixValues(windowRowIndex+rowIndex,windowColumnIndex+columnIndex,0));
+                    }
+                }
+
+                outputMatrix.setMatrixValues(outputValue,rowIndex,columnIndex,0);
+
+            }
+        }
+
+    }
+
+    return outputMatrix;
+
+}
+//----------------------------------------------------------------------------------------------------------------//
+// Connected Component Labelling:
+
+matrix<int,unsigned char> imageAlgorithms::connectedComponentLabelling(matrix<int,bool> inputMatrix){
+
+    // Local variables
+    int matHeight = inputMatrix.getHeight();
+    int matWidth = inputMatrix.getWidth();
+    matrix<int,double> intermediateMatrix(matHeight,matWidth,1);
+    matrix<int,double> outputMatrix(matHeight,matWidth,1);
+    matrix<int,unsigned char> returnMatrix(matHeight,matWidth,1);
+    double pixelValue = 0;
+    map<double,vector<double> > labelTable;
+    double label = 1000000000000;
+    double labelIndex = 0;
+    vector<double> labelVector;
+    double windowValue = 0;
+    vector<double> concatenateVector;
+
+    // First pass
+    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
+        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++){
+
+            pixelValue = (double)inputMatrix.getMatrixValues(rowIndex,columnIndex,0);
+
+            // Check if pixel value is zero
+            if(pixelValue==0){
+                continue;
+            }
+
+            // Get the neighbouring pixels:
+            label = 1000000000000;
+
+            for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
+                for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
+
+                    if(((windowRowIndex==0)&&(windowColumnIndex==0))||((windowRowIndex==1))){
+                        continue;
+                    }
+
+                    windowValue = (double)intermediateMatrix.getMatrixValues(rowIndex+windowRowIndex,columnIndex+windowColumnIndex,0);
+
+                    if(windowValue>0){
+                        label = min(label,windowValue);
+                        labelVector.push_back(windowValue);
+                    }
+
+                }
+            }
+
+            // Create new label if no label found
+            if(label ==1000000000000){
+                labelIndex++;
+                labelTable[labelIndex].push_back(labelIndex);
+                intermediateMatrix.setMatrixValues(labelIndex,rowIndex,columnIndex,0);
+            }else{
+                // Update the label table and set label value
+                intermediateMatrix.setMatrixValues(label,rowIndex,columnIndex,0);
+
+                // Copy all labels to the index
+                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
+                    concatenateVector.insert(concatenateVector.end(),labelTable[labelVector[labelVectorIndex]].begin(),labelTable[labelVector[labelVectorIndex]].end());
+                }
+
+                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
+
+                    if(label==76 && labelVector.size() == 2){
+                        cout<< *min_element(labelTable[78].begin(),labelTable[78].end()) << endl;
+                    }
+
+                   labelTable[labelVector[labelVectorIndex]] = concatenateVector;
+                }
+
+                concatenateVector.clear();
+                labelVector.clear();
+            }
+
+
+        }
+    }
+
+    // Second pass
+    map<int,unsigned char> labelTableMap;
+    double lowestLabel;
+    double componentNumber = 0;
+
+    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
+        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++) {
+
+            pixelValue = (double)intermediateMatrix.getMatrixValues(rowIndex,columnIndex,0);
+
+            // Check if pixel value is zero
+            if(pixelValue==0){
+                continue;
+            }
+
+            lowestLabel = *min_element(labelTable[pixelValue].begin(), labelTable[pixelValue].end() );
+
+            if(labelTableMap.find(lowestLabel) == labelTableMap.end()){
+                labelTableMap[lowestLabel] = ++componentNumber;
+                cout<< componentNumber <<endl;
+            }
+            outputMatrix.setMatrixValues(labelTableMap[lowestLabel],rowIndex,columnIndex,0);
+        }
+    }
+
+    // Convert double to unsigned char
+    for(int rowIndex = 0; rowIndex < matHeight; rowIndex++) {
+        for (int columnIndex = 0; columnIndex < matWidth; columnIndex++) {
+            returnMatrix.setMatrixValues((unsigned char)outputMatrix.getMatrixValues(rowIndex,columnIndex,0), rowIndex,columnIndex,0);
+        }
+    }
+
+    return returnMatrix;
+
+}
 

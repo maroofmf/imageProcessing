@@ -52,6 +52,7 @@ public:
     unsigned char getPixelValuesFrom_xy(double x, double y,unsigned char defaultBackgroundValue=0);
 
     unsigned char accessPixelValue(int row, int column, int depth);
+    void saveBinaryImage(const char* outputFileName);
     void saveImage(const char* outputFileName);
     void imageRead(const char* inputFileName);
 

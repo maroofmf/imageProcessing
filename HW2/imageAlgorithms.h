@@ -36,7 +36,15 @@ public:
     matrix<int,double>  filterApply(imageData frame, matrix<int,double>  window,string algorithm);
     map<int,vector<int> > harrisCornerDetector(double RThreshold);
 
-    matrix<int,bool> shrinking(matrix<int,bool> binaryImageData);
+    matrix<int,bool> morphologicalAlgorithms(matrix<int,bool> binaryImageData, string operation);
+    matrix<int,bool> holeFilling();
+    matrix<int,bool> dilation_holeFilling(matrix<int,bool> seedMatrix, matrix<int,bool> inputMatrix);
+    matrix<int,bool> dilation(matrix<int,bool> inputMatrix, int numberOfIter);
+    matrix<int,bool> erosion(matrix<int,bool> inputMatrix, int numberOfIter);
+
+    matrix<int,unsigned char> connectedComponentLabelling(matrix<int,bool> inputMatrix);
+
+
 
 private:
     imageData* imageObject;
@@ -44,8 +52,8 @@ private:
 
     bool conditionalPatternMatching(string operation,int obtainedPattern);
     bool unconditionalPatternMatching(string operation,int obtainedPattern);
-    static map<int,int > hitMapDeveloper(vector<int> patternValues1,vector<int> patternValues2);
-    static map<int,int > maskMapDeveloper(vector<int> maskValues);
+    map<int,int > hitMapDeveloper(vector<int> patternValues1,vector<int> patternValues2);
+    map<int,vector<int>  > maskMapDeveloper(vector<int> maskValues, vector<int> patternValues1);
     int bound(int obtainedPattern);
 
 };

@@ -1,7 +1,18 @@
-This repository contains image processing algorithms. Not all programs are generalized to work with all images.
+**Image Processing**
 
-########################## Description ######################################
-HW1 : 
-Cropping, Resizing, color space transformation,
-Histogram equalization, noise removal (Median filter, mean filter, NLM) 
+This repository contains image processing algorithms implemented as a   
+part of EE 569 - Introduction to Digital image processing at USC.  
+
+The high level overview of algorithms implemented in each folder is   
+given below:  
+
+**HW1:**   
+-> Cropping  
+-> Resizing  
+-> Color Space Transformation  
+-> Histogram Equalization using TF and CDF based approach  
+-> Image Denoising using Median filter, Mean filter and NLM  
+
+To run the code:
+
 

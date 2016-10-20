@@ -379,6 +379,49 @@ bool matrix<indexDataType,valueDataType>::operator!=(matrix<indexDataType,valueD
     return same;
 
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Operator overload !
+
+template <class indexDataType, class valueDataType>
+matrix<indexDataType,valueDataType> matrix<indexDataType,valueDataType>::operator!(){
+
+    matrix<indexDataType,valueDataType> outputMatrix(matHeight,matWidth,1);
+    valueDataType outputValue = 0;
+
+    for(int rowIndex = 0; rowIndex < matHeight; rowIndex++){
+        for(int columnIndex = 0; columnIndex < matWidth; columnIndex++){
+
+            outputValue = accessMatrixValue(rowIndex,columnIndex,0);
+            outputMatrix.setMatrixValues(!outputValue,rowIndex,columnIndex,0);
+
+        }
+    }
+
+    return outputMatrix;
+
+}
+//----------------------------------------------------------------------------------------------------------------//
+// Operator overload |
+
+template <class indexDataType, class valueDataType>
+matrix<indexDataType,valueDataType> matrix<indexDataType,valueDataType>::operator|(matrix<indexDataType,valueDataType> otherMatrix){
+
+    matrix<indexDataType,valueDataType> outputMatrix(matHeight,matWidth,1);
+    valueDataType outputValue = 0;
+
+    for(int rowIndex = 0; rowIndex < matHeight; rowIndex++){
+        for(int columnIndex = 0; columnIndex < matWidth; columnIndex++){
+
+            outputValue = (bool)(accessMatrixValue(rowIndex,columnIndex,0))|(bool)(otherMatrix.accessMatrixValue(rowIndex,columnIndex,0));
+            outputMatrix.setMatrixValues(outputValue,rowIndex,columnIndex,0);
+
+        }
+    }
+
+    return outputMatrix;
+
+
+}
 
 //----------------------------------------------------------------------------------------------------------------//
 // Count number of non zero elements
@@ -410,6 +453,59 @@ void matrix<indexDataType,valueDataType>::multiplyEachValueBy(valueDataType valu
 }
 
 //----------------------------------------------------------------------------------------------------------------//
+// Extend matrix by zeros:
+template <class indexDataType, class valueDataType>
+void matrix<indexDataType,valueDataType>::zeroPad(indexDataType padBy){
+
+    matrix<indexDataType,valueDataType> paddedMatrix(matHeight+2*padBy,matWidth+2*padBy,0);
+
+    for(indexDataType rowIndex = 0; rowIndex < matHeight+2*padBy; rowIndex++){
+        for(indexDataType columnIndex = 0; columnIndex < matWidth+2*padBy; columnIndex++){
+
+            if(((rowIndex-padBy)<0)||((columnIndex-padBy)<0)||((rowIndex-padBy)>=matHeight)||((columnIndex-padBy)>=matWidth)){
+                paddedMatrix.setMatrixValues(0,rowIndex,columnIndex,0);
+            }else{
+                paddedMatrix.setMatrixValues(accessMatrixValue(rowIndex-padBy,columnIndex-padBy,0),rowIndex,columnIndex,0);
+            }
+
+        }
+    }
+
+    // Replace Parameters
+    matHeight += 2*padBy;
+    matWidth += 2*padBy;
+
+    matData = paddedMatrix.getMatrixValues();
+
+}
+//----------------------------------------------------------------------------------------------------------------//
+// Extend matrix by zeros:
+template <class indexDataType, class valueDataType>
+void matrix<indexDataType,valueDataType>::removeZeroPadding(indexDataType paddedBy){
+
+    matrix<indexDataType,valueDataType> unPaddedMatrix(matHeight-2*paddedBy,matWidth-2*paddedBy,0);
+
+    for(indexDataType rowIndex = 0; rowIndex < matHeight; rowIndex++){
+        for(indexDataType columnIndex = 0; columnIndex < matWidth; columnIndex++){
+
+            if(((rowIndex-paddedBy)<0)||((columnIndex-paddedBy)<0)||((rowIndex-paddedBy)>=matHeight)||((columnIndex-paddedBy)>=matWidth)){
+                continue;
+            }else{
+                unPaddedMatrix.setMatrixValues(accessMatrixValue(rowIndex,columnIndex,0),rowIndex-paddedBy,columnIndex-paddedBy,0);
+            }
+
+        }
+    }
+
+    // Replace Parameters
+    matHeight -= 2*paddedBy;
+    matWidth -= 2*paddedBy;
+
+    matData = unPaddedMatrix.getMatrixValues();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
 // Access matrix values from row, column, depth
 
 template <class indexDataType, class valueDataType>
@@ -435,7 +531,7 @@ void matrix<indexDataType,valueDataType>::printMatrix(){
         for (indexDataType rowIndex = 0; rowIndex < matHeight; rowIndex++) {
             for (indexDataType columnIndex = 0; columnIndex < matWidth; columnIndex++) {
 
-                outputFile <<  matData[rowIndex * matWidth * matDepth + columnIndex * matDepth + depthIndex] <<
+                outputFile <<  (double)matData[rowIndex * matWidth * matDepth + columnIndex * matDepth + depthIndex] <<
                 "\t";
             }
             outputFile << "\n";

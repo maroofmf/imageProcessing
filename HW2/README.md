@@ -24,7 +24,7 @@ OBJS = main.o imageData.o imageAlgorithms.o matrix.o
 cc = g++
 DEBUG = -g
 CFLAGS = -c
-OUTPUTFOLDERS = p2_a_output p2_b_output p1_a_output p1_b_output p1_c_output
+OUTPUTFOLDERS = p3_a_output p3_b_output  p2_a_output p2_b_output p1_a_output p1_b_output p1_c_output
 
 ################################### Aruguments #################################
 # Format of arguments: inputImagePath outputImageName BytesPerPixel imageWidth imageHeight problemNumber *additional problem parameters*
@@ -35,6 +35,7 @@ ARGS3 = HW\ 2\ images/Kitten_2.raw kitten_2_out 3 300 300 1
 ARGS4 = HW\ 2\ images/piece.raw piece_out 3 500 500 2 HW\ 2\ images/Hillary.raw HW\ 2\ images/Trump.raw 3 512 512
 ARGS5 = HW\ 2\ images/field.raw field_out 3 972 648 3 HW\ 2\ images/tartans.raw HW\ 2\ images/trojans.raw 3 350 146
 ARGS6 = HW\ 2\ images/Rice.raw rice_out 3 690 500 5
+ARGS7 = HW\ 2\ images/Butterfly.raw mpeg_out 1 335 320 6 HW\ 2\ images/Fly.raw 1 222 223 HW\ 2\ images/Probe.raw 1 496 502
 
 ################################ Code Execution and Linking ##################
 all: hw2_exe run	
@@ -72,5 +73,6 @@ run:
 	./hw2_exe $(ARGS4)
 	./hw2_exe $(ARGS5)
 	./hw2_exe $(ARGS6)
+	./hw2_exe $(ARGS7)
 	
 ############################### END ################################################
