@@ -17,8 +17,8 @@ for images are passed to the program.
     
     > make
  
-* To clean all the folders and object files in the folder run:   
-    > make clean
+* To clean all the folders and object files in the folder run:       
+> make clean
 * The output images will be stored in the folder with names based on   
 the question number.
 * Please change the arguments in makefile if new test images are used.
