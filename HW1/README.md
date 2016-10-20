@@ -1,12 +1,12 @@
 ## Description:
 
-> EE 569 Homework 1
-> Date: 18 September 2016
-> Name: Maroof Mohammed Farooq 
-> USCID : 7126869945 
-> Email : maroofmf@usc.edu
-> Operating System: OSX El Capitan -v 10.11.6
-> Compiler: g++
+> EE 569 Homework 1  
+> Date: 18 September 2016  
+> Name: Maroof Mohammed Farooq   
+> USCID : 7126869945  
+> Email : maroofmf@usc.edu  
+> Operating System: OSX El Capitan -v 10.11.6  
+> Compiler: g++    
 
 ## Guidelines for running the code:
 
