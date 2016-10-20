@@ -13,10 +13,10 @@
 * All the input image folders (P1,P2,P3) from the question should be   
 included seperately in the source folder. Please note that the paths   
 for images are passed to the program.
-* To compile and run the program just type:
-> make 
+* To compile and run the program just type:  
+    > make 
 * To clean all the folders and object files in the folder run: 
-> make clean
+    > make clean
 * The output images will be stored in the folder with names based on   
 the question number.
 * Please change the arguments in makefile if new test images are used.
