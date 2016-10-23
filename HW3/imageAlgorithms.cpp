@@ -13,11 +13,14 @@
 #include <string>
 #include <numeric>
 #include <algorithm>
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
 #include "imageData.h"
 #include "imageAlgorithms.h"
 #include "matrix.h"
 
 using namespace std;
+using namespace cv;
 
 //----------------------------------------------------------------------------------------------------------------//
 // Image Algorithms constructor

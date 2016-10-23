@@ -3,8 +3,10 @@
 OBJS = main.o imageData.o imageAlgorithms.o matrix.o
 cc = g++
 DEBUG = -g
+CFLAGS1 = `pkg-config --cflags opencv`
 CFLAGS = -c
-OUTPUTFOLDERS = p3_a_output p3_b_output  p2_a_output p2_b_output p1_a_output p1_b_output p1_c_output
+LIBS = `pkg-config --libs opencv`
+OUTPUTFOLDERS = p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_output p2_c_output p1_a_output p1_b_output p1_c_output
 
 # List of arguments:
 ARGS1 = HW\ 2\ images/house.raw houseOut 1 512 512 4
@@ -16,11 +18,11 @@ ARGS6 = HW\ 2\ images/Rice.raw rice_out 3 690 500 5
 ARGS7 = HW\ 2\ images/Butterfly.raw mpeg_out 1 335 320 6 HW\ 2\ images/Fly.raw 1 222 223 HW\ 2\ images/Probe.raw 1 496 502
 
 # Code Execution:
-all: hw2_exe run
+all: hw3_exe run
 
-hw2_exe: $(OBJS)
+hw3_exe: $(OBJS)
 	@echo "Linking the code"
-	$(cc) $(OBJS) -o hw2_exe
+	$(cc) $(LIBS) $(OBJS) -o hw3_exe
 
 main.o: main.cpp
 	@echo "Compiling main.cpp in progress"
@@ -34,20 +36,21 @@ imageAlgorithms.o: imageAlgorithms.h imageAlgorithms.cpp
 
 matrix.o: matrix.h matrix.cpp
 	$(cc) $(CFLAGS) matrix.cpp
+
 clean:
 	@echo "Cleaning folder by deleting object and executable files"
 	rm -rf $(OUTPUTFOLDERS)
-	rm -rf *.o hw2_exe  *.raw *.out *.txt
+	rm -rf *.o hw3_exe  *.raw *.out *.txt
 
 run:
 	@echo "Deleting all output folders"
 	rm -rf $(OUTPUTFOLDERS)
 	@echo "Running the executable files"
 	mkdir $(OUTPUTFOLDERS)
-	./hw2_exe $(ARGS1)
-	./hw2_exe $(ARGS2)
-	./hw2_exe $(ARGS3)
-	./hw2_exe $(ARGS4)
-	./hw2_exe $(ARGS5)
-	./hw2_exe $(ARGS6)
-	./hw2_exe $(ARGS7)
+	./hw3_exe $(ARGS1)
+	#./hw2_exe $(ARGS2)
+	#./hw2_exe $(ARGS3)
+	#./hw2_exe $(ARGS4)
+	#./hw2_exe $(ARGS5)
+	#./hw2_exe $(ARGS6)
+	#./hw2_exe $(ARGS7)

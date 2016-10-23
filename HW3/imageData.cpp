@@ -10,12 +10,15 @@
 #include <fstream>
 #include <iterator>
 #include <math.h>
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
 #include "imageData.h"
 #include "imageAlgorithms.h"
 #include "matrix.h"
 
 // Namespace
 using namespace std;
+using namespace cv;
 
 //----------------------------------------------------------------------------------------------------------------//
 // Image constructor I: Used to initialize a black image

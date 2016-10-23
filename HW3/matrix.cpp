@@ -19,11 +19,14 @@
 #include <math.h>
 #include <map>
 #include <stdarg.h>
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
 #include "imageData.h"
 #include "imageAlgorithms.h"
 #include "matrix.h"
 
 using namespace std;
+using namespace cv;
 //----------------------------------------------------------------------------------------------------------------//
 // Default constructor
 template <class indexDataType, class valueDataType>
@@ -99,7 +102,7 @@ void matrix<indexDataType,valueDataType>::setMatrixByValues(indexDataType number
     for(int index=0;index<numberOfArguments ; index++){
         matData[index] = va_arg(ap,valueDataType);
     }
-
+    va_end(ap);
 };
 //----------------------------------------------------------------------------------------------------------------//
 // Get matrix values for row,col and depth
