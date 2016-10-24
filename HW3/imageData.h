@@ -6,6 +6,7 @@
 #define CPP_IMAGEDATA_H
 
 using namespace std;
+using namespace cv;
 
 class imageData{
 public:
@@ -53,6 +54,7 @@ public:
 
     unsigned char accessPixelValue(int row, int column, int depth);
     void saveBinaryImage(const char* outputFileName);
+    Mat convertToMat();
     void saveImage(const char* outputFileName);
     void imageRead(const char* inputFileName);
 

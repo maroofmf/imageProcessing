@@ -9,7 +9,7 @@ LIBS = `pkg-config --libs opencv`
 OUTPUTFOLDERS = p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_output p2_c_output p1_a_output p1_b_output p1_c_output
 
 # List of arguments:
-ARGS1 = HW\ 2\ images/house.raw houseOut 1 512 512 4
+ARGS1 = HW3\ Images/P1/Texture.raw texture 1 128 128 1 12
 ARGS2 = HW\ 2\ images/Kitten_1.raw kitten_1_out 3 300 300 1
 ARGS3 = HW\ 2\ images/Kitten_2.raw kitten_2_out 3 300 300 1
 ARGS4 = HW\ 2\ images/piece.raw piece_out 3 500 500 2 HW\ 2\ images/Hillary.raw HW\ 2\ images/Trump.raw 3 512 512

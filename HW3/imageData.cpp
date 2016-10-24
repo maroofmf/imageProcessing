@@ -785,7 +785,43 @@ void imageData::saveBinaryImage(const char* outputFileName){
     fwrite(&convertedPixelData[0], sizeof(unsigned char), imageWidth*imageHeight*BytesPerPixel, outputFile);
     fclose(outputFile);
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Convert an image to Mat file
+Mat imageData::convertToMat(){
 
+    // Test for number of channels
+    if(BytesPerPixel == 3){
+
+        Mat outputContainer(imageHeight,imageWidth,CV_8UC3);
+        Vec3b intensities;
+        // Fill in image values into mat file:
+        for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
+            for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+
+                intensities.val[0] = accessPixelValue(rowIndex,columnIndex,2);
+                intensities.val[1] = accessPixelValue(rowIndex,columnIndex,1);
+                intensities.val[2] = accessPixelValue(rowIndex,columnIndex,0);
+                outputContainer.at<Vec3b>(rowIndex,columnIndex) = intensities;
+            }
+        }
+        return outputContainer;
+
+    }else if(BytesPerPixel == 1){
+
+        Mat outputContainer(imageHeight,imageWidth,CV_8UC1);
+        // Fill in image values into mat file:
+        for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
+            for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+                outputContainer.at<unsigned char>(rowIndex,columnIndex) = accessPixelValue(rowIndex,columnIndex,0);
+            }
+        }
+        return outputContainer;
+
+    }else{
+        cout<< " Bytes per pixel incorrect while converting to mat!" <<endl;
+        exit(0);
+    }
+}
 
 //----------------------------------------------------------------------------------------------------------------//
 // Load image from file

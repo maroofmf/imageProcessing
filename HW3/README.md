@@ -25,10 +25,10 @@ the question number.
 
 ## Troubleshooting:
 
-* If you get the following error because of the makefile:
+* If you get the following error because of the makefile:  
 > ld: library not found for -lippicv  
 * This just means that ippicv is not found inside /usr/local/lib. To fix
-this, please find "libippicv.a" in your system by running:  
+this, please find "libippicv.a" in your system by running:    
 > find /usr/local -name "libippicv.a"
 * This will give you the location for libippicv.a. Then symbolically
 link it to /usr/local/lib by running:  
