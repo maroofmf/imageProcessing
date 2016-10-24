@@ -43,13 +43,11 @@ public:
     matrix<int,bool> erosion(matrix<int,bool> inputMatrix, int numberOfIter);
 
     matrix<int,unsigned char> connectedComponentLabelling(matrix<int,bool> inputMatrix);
-
-
+    static map<int, matrix<int,double> > getLawsFilter();
 
 private:
     imageData* imageObject;
     matrix<int,int> bayerMat(int size);
-
     bool conditionalPatternMatching(string operation,int obtainedPattern);
     bool unconditionalPatternMatching(string operation,int obtainedPattern);
     map<int,int > hitMapDeveloper(vector<int> patternValues1,vector<int> patternValues2);

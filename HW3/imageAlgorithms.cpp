@@ -1938,118 +1938,163 @@ matrix<int,bool> imageAlgorithms::erosion(matrix<int,bool> inputMatrix, int numb
 }
 //----------------------------------------------------------------------------------------------------------------//
 // Connected Component Labelling:
+//
+//matrix<int,unsigned char> imageAlgorithms::connectedComponentLabelling(matrix<int,bool> inputMatrix){
+//
+//    // Local variables
+//    int matHeight = inputMatrix.getHeight();
+//    int matWidth = inputMatrix.getWidth();
+//    matrix<int,double> intermediateMatrix(matHeight,matWidth,1);
+//    matrix<int,double> outputMatrix(matHeight,matWidth,1);
+//    matrix<int,unsigned char> returnMatrix(matHeight,matWidth,1);
+//    double pixelValue = 0;
+//    map<double,vector<double> > labelTable;
+//    double label = 1000000000000;
+//    double labelIndex = 0;
+//    vector<double> labelVector;
+//    double windowValue = 0;
+//    vector<double> concatenateVector;
+//
+//    // First pass
+//    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
+//        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++){
+//
+//            pixelValue = (double)inputMatrix.getMatrixValues(rowIndex,columnIndex,0);
+//
+//            // Check if pixel value is zero
+//            if(pixelValue==0){
+//                continue;
+//            }
+//
+//            // Get the neighbouring pixels:
+//            label = 1000000000000;
+//
+//            for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
+//                for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
+//
+//                    if(((windowRowIndex==0)&&(windowColumnIndex==0))||((windowRowIndex==1))){
+//                        continue;
+//                    }
+//
+//                    windowValue = (double)intermediateMatrix.getMatrixValues(rowIndex+windowRowIndex,columnIndex+windowColumnIndex,0);
+//
+//                    if(windowValue>0){
+//                        label = min(label,windowValue);
+//                        labelVector.push_back(windowValue);
+//                    }
+//
+//                }
+//            }
+//
+//            // Create new label if no label found
+//            if(label ==1000000000000){
+//                labelIndex++;
+//                labelTable[labelIndex].push_back(labelIndex);
+//                intermediateMatrix.setMatrixValues(labelIndex,rowIndex,columnIndex,0);
+//            }else{
+//                // Update the label table and set label value
+//                intermediateMatrix.setMatrixValues(label,rowIndex,columnIndex,0);
+//
+//                // Copy all labels to the index
+//                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
+//                    concatenateVector.insert(concatenateVector.end(),labelTable[labelVector[labelVectorIndex]].begin(),labelTable[labelVector[labelVectorIndex]].end());
+//                }
+//
+//                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
+//
+//                    if(label==76 && labelVector.size() == 2){
+//                        cout<< *min_element(labelTable[78].begin(),labelTable[78].end()) << endl;
+//                    }
+//
+//                   labelTable[labelVector[labelVectorIndex]] = concatenateVector;
+//                }
+//
+//                concatenateVector.clear();
+//                labelVector.clear();
+//            }
+//
+//
+//        }
+//    }
+//
+//    // Second pass
+//    map<int,unsigned char> labelTableMap;
+//    double lowestLabel;
+//    double componentNumber = 0;
+//
+//    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
+//        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++) {
+//
+//            pixelValue = (double)intermediateMatrix.getMatrixValues(rowIndex,columnIndex,0);
+//
+//            // Check if pixel value is zero
+//            if(pixelValue==0){
+//                continue;
+//            }
+//
+//            lowestLabel = *min_element(labelTable[pixelValue].begin(), labelTable[pixelValue].end() );
+//
+//            if(labelTableMap.find(lowestLabel) == labelTableMap.end()){
+//                labelTableMap[lowestLabel] = ++componentNumber;
+//                cout<< componentNumber <<endl;
+//            }
+//            outputMatrix.setMatrixValues(labelTableMap[lowestLabel],rowIndex,columnIndex,0);
+//        }
+//    }
+//
+//    // Convert double to unsigned char
+//    for(int rowIndex = 0; rowIndex < matHeight; rowIndex++) {
+//        for (int columnIndex = 0; columnIndex < matWidth; columnIndex++) {
+//            returnMatrix.setMatrixValues((unsigned char)outputMatrix.getMatrixValues(rowIndex,columnIndex,0), rowIndex,columnIndex,0);
+//        }
+//    }
+//
+//    return returnMatrix;
+//
+//}
 
-matrix<int,unsigned char> imageAlgorithms::connectedComponentLabelling(matrix<int,bool> inputMatrix){
+//----------------------------------------------------------------------------------------------------------------//
+// Create Laws filter:
 
-    // Local variables
-    int matHeight = inputMatrix.getHeight();
-    int matWidth = inputMatrix.getWidth();
-    matrix<int,double> intermediateMatrix(matHeight,matWidth,1);
-    matrix<int,double> outputMatrix(matHeight,matWidth,1);
-    matrix<int,unsigned char> returnMatrix(matHeight,matWidth,1);
-    double pixelValue = 0;
-    map<double,vector<double> > labelTable;
-    double label = 1000000000000;
-    double labelIndex = 0;
-    vector<double> labelVector;
-    double windowValue = 0;
-    vector<double> concatenateVector;
+map<int, matrix<int,double> > imageAlgorithms::getLawsFilter(){
 
-    // First pass
-    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
-        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++){
+    // Initialize variables
+    static map<int, matrix<int,double>* > lawsFilter;
+    static map<int, matrix<int,double> > filterBank;
+    static matrix<int,double> level(5,1,1);
+    static matrix<int,double> edge(5,1,1);
+    static matrix<int,double> spot(5,1,1);
+    static matrix<int,double> wave(5,1,1);
+    static matrix<int,double> ripple(5,1,1);
 
-            pixelValue = (double)inputMatrix.getMatrixValues(rowIndex,columnIndex,0);
+    // Initialze filter values
+    level.setMatrixByValues(5,1.0,4.0,6.0,4.0,1.0);
+    edge.setMatrixByValues(5,-1.0,-2.0,0.0,2.0,1.0);
+    spot.setMatrixByValues(5,-1.0,0.0,2.0,0.0,-1.0);
+    wave.setMatrixByValues(5,-1.0,2.0,0.0,-2.0,1.0);
+    ripple.setMatrixByValues(5,1.0,-4.0,6.0,-4.0,1.0);
 
-            // Check if pixel value is zero
-            if(pixelValue==0){
-                continue;
-            }
+    // Set filter values in map
+    lawsFilter[0] = &level;
+    lawsFilter[1] = &edge;
+    lawsFilter[2] = &spot;
+    lawsFilter[3] = &wave;
+    lawsFilter[4] = &ripple;
 
-            // Get the neighbouring pixels:
-            label = 1000000000000;
+    // Create filter bank:
 
-            for(int windowRowIndex = -1; windowRowIndex < 2; windowRowIndex++) {
-                for (int windowColumnIndex = -1; windowColumnIndex < 2; windowColumnIndex++) {
-
-                    if(((windowRowIndex==0)&&(windowColumnIndex==0))||((windowRowIndex==1))){
-                        continue;
-                    }
-
-                    windowValue = (double)intermediateMatrix.getMatrixValues(rowIndex+windowRowIndex,columnIndex+windowColumnIndex,0);
-
-                    if(windowValue>0){
-                        label = min(label,windowValue);
-                        labelVector.push_back(windowValue);
-                    }
-
-                }
-            }
-
-            // Create new label if no label found
-            if(label ==1000000000000){
-                labelIndex++;
-                labelTable[labelIndex].push_back(labelIndex);
-                intermediateMatrix.setMatrixValues(labelIndex,rowIndex,columnIndex,0);
-            }else{
-                // Update the label table and set label value
-                intermediateMatrix.setMatrixValues(label,rowIndex,columnIndex,0);
-
-                // Copy all labels to the index
-                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
-                    concatenateVector.insert(concatenateVector.end(),labelTable[labelVector[labelVectorIndex]].begin(),labelTable[labelVector[labelVectorIndex]].end());
-                }
-
-                for(int labelVectorIndex = 0; labelVectorIndex < labelVector.size(); labelVectorIndex++){
-
-                    if(label==76 && labelVector.size() == 2){
-                        cout<< *min_element(labelTable[78].begin(),labelTable[78].end()) << endl;
-                    }
-
-                   labelTable[labelVector[labelVectorIndex]] = concatenateVector;
-                }
-
-                concatenateVector.clear();
-                labelVector.clear();
-            }
-
-
+    int filterBankIndex = 0;
+    for(int filterIndex_1 = 0; filterIndex_1 < 5; filterIndex_1++){
+        for(int filterIndex_2 = 0; filterIndex_2 < 5; filterIndex_2++){
+            // Multiply
+            matrix<int,double> tempMatrix = *(new matrix<int,double>(5,5,1));
+            tempMatrix = lawsFilter[filterIndex_1]->multiplyWith(lawsFilter[filterIndex_2]->transpose());
+            filterBank[filterBankIndex++] = tempMatrix;
         }
     }
 
-    // Second pass
-    map<int,unsigned char> labelTableMap;
-    double lowestLabel;
-    double componentNumber = 0;
-
-    for(int rowIndex = 1; rowIndex < matHeight-1; rowIndex++){
-        for(int columnIndex = 1; columnIndex < matWidth-1; columnIndex++) {
-
-            pixelValue = (double)intermediateMatrix.getMatrixValues(rowIndex,columnIndex,0);
-
-            // Check if pixel value is zero
-            if(pixelValue==0){
-                continue;
-            }
-
-            lowestLabel = *min_element(labelTable[pixelValue].begin(), labelTable[pixelValue].end() );
-
-            if(labelTableMap.find(lowestLabel) == labelTableMap.end()){
-                labelTableMap[lowestLabel] = ++componentNumber;
-                cout<< componentNumber <<endl;
-            }
-            outputMatrix.setMatrixValues(labelTableMap[lowestLabel],rowIndex,columnIndex,0);
-        }
-    }
-
-    // Convert double to unsigned char
-    for(int rowIndex = 0; rowIndex < matHeight; rowIndex++) {
-        for (int columnIndex = 0; columnIndex < matWidth; columnIndex++) {
-            returnMatrix.setMatrixValues((unsigned char)outputMatrix.getMatrixValues(rowIndex,columnIndex,0), rowIndex,columnIndex,0);
-        }
-    }
-
-    return returnMatrix;
-
+    return filterBank;
 }
+
+
 

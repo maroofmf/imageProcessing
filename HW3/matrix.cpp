@@ -525,10 +525,12 @@ valueDataType matrix<indexDataType,valueDataType>::accessMatrixValue(indexDataTy
 template <class indexDataType, class valueDataType>
 void matrix<indexDataType,valueDataType>::printMatrix(){
 
+
+    static int fileNumber = 1;
     // Open text file
     ofstream outputFile;
-    remove("matrixData.txt");
-    outputFile.open ("matrixData.txt", ofstream::out | ofstream::app);
+    string outputFileName = "metadata/matrixData"+to_string(fileNumber++)+".txt";
+    outputFile.open (outputFileName, ofstream::out | ofstream::app);
 
     for(indexDataType depthIndex = 0; depthIndex < matDepth; depthIndex++) {
         for (indexDataType rowIndex = 0; rowIndex < matHeight; rowIndex++) {

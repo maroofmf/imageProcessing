@@ -6,7 +6,7 @@ DEBUG = -g
 CFLAGS1 = `pkg-config --cflags opencv`
 CFLAGS = -c
 LIBS = `pkg-config --libs opencv`
-OUTPUTFOLDERS = p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_output p2_c_output p1_a_output p1_b_output p1_c_output
+OUTPUTFOLDERS = metadata p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_output p2_c_output p1_a_output p1_b_output p1_c_output
 
 # List of arguments:
 ARGS1 = HW3\ Images/P1/Texture.raw texture 1 128 128 1 12
