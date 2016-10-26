@@ -1125,6 +1125,7 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
         exit(-2);
     }
 
+
     // Set input and output images
     matrix<int,double> outputFrame(imageHeight,imageWidth,1);
     imageData extendedImage = frame.extendImage(extendBy);
@@ -1140,6 +1141,10 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
                         outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
                     }
 
+                    if(algorithm=="convolutionWithoutAbsolute"){
+                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+                    }
+
                 }
             }
 
@@ -1147,6 +1152,12 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
                 outputFrame.setMatrixValues(fabs(outValue),rowIndex,columnIndex,0);
                 outValue=0.0;
             }
+
+            if(algorithm=="convolutionWithoutAbsolute"){
+                outputFrame.setMatrixValues(outValue,rowIndex,columnIndex,0);
+                outValue=0.0;
+            }
+
         }
     }
 
@@ -2095,6 +2106,62 @@ map<int, matrix<int,double> > imageAlgorithms::getLawsFilter(){
 
     return filterBank;
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Caluculate energy value of an image:
+double imageAlgorithms::imageEnergy(matrix<int,double> inputMatrix,double DC_Component){
+
+    // Input matrix paramters
+    double energyValue;
+    int matrixHeight = inputMatrix.getHeight();
+    int matrixWidth = inputMatrix.getWidth();
+    int matrixDepth = inputMatrix.getDepth();
+    vector<double>  matrixValues = inputMatrix.getMatrixValues();
+    for_each(matrixValues.begin(),matrixValues.end(), [&](double x){ energyValue += pow(x-DC_Component,2.0); } );
+
+    // Calculate energy
+//    for(int depthIndex = 0; depthIndex < matrixDepth; depthIndex++){
+//        for(int rowIndex = 0; rowIndex < matrixHeight; rowIndex++){
+//            for(int columnIndex = 0; columnIndex < matrixWidth; columnIndex++){
+//                energyValue += pow((inputMatrix.accessMatrixValue(rowIndex,columnIndex,depthIndex)- DC_Component),2.0);
+//            }
+//        }
+//    }
+
+
+    // Average the energy values
+    energyValue = energyValue/(matrixDepth*matrixHeight*matrixWidth);
+
+    return energyValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Caluculate DC value of an image:
+double imageAlgorithms::calculateDC(imageData inputImage){
+
+    // Input matrix paramters
+    double energyValue;
+    int imageHeight = inputImage.getImageHeight();
+    int imageWidth = inputImage.getImageWidth();
+    int imageDepth = inputImage.getBytesPerPixel();
+    vector<unsigned char>  pixelValues = inputImage.getPixelValues();
+    for_each(pixelValues.begin(),pixelValues.end(), [&](unsigned char x){ energyValue += x; } );
+
+
+//    // Calculate energy
+//    for(int depthIndex = 0; depthIndex < imageDepth; depthIndex++){
+//        for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
+//            for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+//                energyValue += (inputImage.accessPixelValue(rowIndex,columnIndex,depthIndex));
+//            }
+//        }
+//    }
+
+    // Average the energy values
+    energyValue = energyValue/(imageDepth*imageHeight*imageWidth);
+
+    return energyValue;
+}
+
 
 
 

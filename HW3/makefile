@@ -1,7 +1,7 @@
 
 # Macros:
 OBJS = main.o imageData.o imageAlgorithms.o matrix.o
-cc = g++
+cc = clang++ -std=c++11 -w
 DEBUG = -g
 CFLAGS1 = `pkg-config --cflags opencv`
 CFLAGS = -c

@@ -6,7 +6,8 @@
 > **USCID:** 7126869945  
 > **Email:** maroofmf@usc.edu  
 > **Operating System:** OSX El Capitan -v 10.11.6  
-> **Compiler:** g++    
+> **Compiler:** clang++
+> **C++ Version:** C++11 
 
 ## Guidelines for running the code:
 

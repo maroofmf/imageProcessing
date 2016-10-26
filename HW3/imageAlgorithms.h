@@ -44,6 +44,8 @@ public:
 
     matrix<int,unsigned char> connectedComponentLabelling(matrix<int,bool> inputMatrix);
     static map<int, matrix<int,double> > getLawsFilter();
+    double imageEnergy(matrix<int,double> inputMatrix,double DC_Component);
+    double calculateDC(imageData inputImage);
 
 private:
     imageData* imageObject;
