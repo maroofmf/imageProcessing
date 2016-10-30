@@ -140,6 +140,88 @@ indexDataType matrix<indexDataType,valueDataType>::getDepth(){
 }
 
 //----------------------------------------------------------------------------------------------------------------//
+// Extend matrix
+template <class indexDataType, class valueDataType>
+matrix<indexDataType,valueDataType> matrix<indexDataType,valueDataType>::extendMatrix(indexDataType extendBy){
+
+    // Declare variables
+    matrix<indexDataType,valueDataType> extendedMatrix(matHeight+2*extendBy,matWidth+2*extendBy, matDepth);
+    valueDataType matrixValue;
+
+    // Copy the original matrix into the extended image
+    for(int depthIndex=0; depthIndex<matDepth;depthIndex++){
+        for(int rowIndex=0; rowIndex<matHeight;rowIndex++){
+            for(int columnIndex=0; columnIndex<matWidth;columnIndex++){
+                matrixValue= accessMatrixValue(rowIndex,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex+extendBy,columnIndex+extendBy,depthIndex);
+            }
+        }
+    }
+
+    // Interpolate the matrix values of top and bottom rows
+    int extendedIndex = matHeight + extendBy;
+    for(int depthIndex=0; depthIndex<matDepth;depthIndex++){
+        for(int rowIndex=0; rowIndex<extendBy;rowIndex++){
+            for(int columnIndex=0; columnIndex<matWidth;columnIndex++){
+                // top rows
+                matrixValue = accessMatrixValue(rowIndex,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,extendBy-rowIndex-1,columnIndex+extendBy,depthIndex);
+                // bottom rows
+                matrixValue = accessMatrixValue(matHeight-rowIndex-1,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,extendedIndex,columnIndex+extendBy,depthIndex);
+            }
+            extendedIndex+=1;
+        }
+        extendedIndex = matHeight + extendBy;
+    }
+
+    // Interpolate the pixel values of right and left column
+    extendedIndex = matWidth + extendBy;
+    for(int depthIndex=0; depthIndex<matDepth;depthIndex++){
+        for(int rowIndex=0; rowIndex<matHeight;rowIndex++){
+            for(int columnIndex=0; columnIndex<extendBy;columnIndex++){
+                // left column
+                matrixValue = accessMatrixValue(rowIndex,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex+extendBy,extendBy-columnIndex-1,depthIndex);
+                // right column
+                matrixValue = accessMatrixValue(rowIndex,matWidth-columnIndex-1,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex+extendBy,extendedIndex,depthIndex);
+                extendedIndex+=1;
+            }
+            extendedIndex = matWidth + extendBy;
+        }
+        extendedIndex = matWidth + extendBy;
+    }
+
+    for(int depthIndex=0; depthIndex<matDepth;depthIndex++) {
+        for (int rowIndex = 0; rowIndex < extendBy; rowIndex++) {
+            for (int columnIndex = 0; columnIndex < extendBy; columnIndex++) {
+
+                // top left corner
+                matrixValue = extendedMatrix.getMatrixValues(rowIndex+extendBy,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex,columnIndex,depthIndex);
+
+                // bottom left corner
+                matrixValue = extendedMatrix.getMatrixValues(rowIndex+matHeight,columnIndex,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex+matHeight+extendBy,columnIndex,depthIndex);
+
+                // top right corner
+                matrixValue = extendedMatrix.getMatrixValues(rowIndex+extendBy,columnIndex+matWidth+extendBy,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex,columnIndex+matWidth+extendBy,depthIndex);
+
+                // bottom right corner
+                matrixValue = extendedMatrix.getMatrixValues(rowIndex+matHeight,columnIndex+matWidth+extendBy,depthIndex);
+                extendedMatrix.setMatrixValues(matrixValue,rowIndex+matHeight+extendBy,columnIndex+matWidth+extendBy,depthIndex);
+
+            }
+        }
+    }
+
+
+    return(extendedMatrix);
+}
+
+//----------------------------------------------------------------------------------------------------------------//
 // Trace of matrix:
 template <class indexDataType, class valueDataType>
 double matrix<indexDataType,valueDataType>::trace(matrix<indexDataType,valueDataType> inputMatrix){

@@ -1106,12 +1106,12 @@ void imageAlgorithms::adaptiveBinarization(int windowSize){
 }
 
 //----------------------------------------------------------------------------------------------------------------//
-//Filter applyer:
+// I. Filter applyer:
 matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,double> window,string algorithm){
 
     // Local Variables
-    int imageWidth = imageObject->getImageWidth();
-    int imageHeight = imageObject->getImageHeight();
+    int imageWidth = frame.getImageWidth();
+    int imageHeight = frame.getImageHeight();
     int windowSize = window.getHeight();
     int extendBy = floor(windowSize/2);
 
@@ -1120,7 +1120,7 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
         cout<< "Please re-enter the matrix! Wrong matrix size" <<endl;
         exit(-2);
     }
-    if(imageObject->getBytesPerPixel()!=1){
+    if(frame.getBytesPerPixel()!=1){
         cout<< "Please re-enter the image! Wrong image size" <<endl;
         exit(-2);
     }
@@ -1164,6 +1164,67 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
     return  outputFrame;
 
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// II. Filter applyer:
+//matrix<int,double> imageAlgorithms::filterApply(matrix<int,double> frame, matrix<int,double> window,string algorithm){
+//
+//    // Local Variables
+//    int imageWidth = frame.getWidth();
+//    int imageHeight = frame.getHeight();
+//    int windowSize = window.getHeight();
+//    int extendBy = floor(windowSize/2);
+//
+//    // Test if the input is accurate
+//    if(windowSize!=window.getWidth()){
+//        cout<< "Please re-enter the matrix! Wrong matrix size" <<endl;
+//        exit(-2);
+//    }
+//    if(frame.getDepth()!=1){
+//        cout<< "Please re-enter the image! Wrong image size" <<endl;
+//        exit(-2);
+//    }
+//
+//    // Set input and output images
+//    matrix<int,double> outputFrame(imageHeight,imageWidth,1);
+//
+//    // Extend Image
+//    imageData extendedImage = frame.extendImage(extendBy);
+//    double outValue = 0.0;
+//
+//    for(int rowIndex = 0;rowIndex < imageHeight; rowIndex++){
+//        for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+//
+//            for(int windowRow = 0;windowRow < windowSize; windowRow++) {
+//                for (int windowColumn = 0; windowColumn < windowSize; windowColumn++) {
+//
+//                    if(algorithm =="convolutionWithAbsolute"){
+//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+//                    }
+//
+//                    if(algorithm=="convolutionWithoutAbsolute"){
+//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+//                    }
+//
+//                }
+//            }
+//
+//            if(algorithm =="convolutionWithAbsolute"){
+//                outputFrame.setMatrixValues(fabs(outValue),rowIndex,columnIndex,0);
+//                outValue=0.0;
+//            }
+//
+//            if(algorithm=="convolutionWithoutAbsolute"){
+//                outputFrame.setMatrixValues(outValue,rowIndex,columnIndex,0);
+//                outValue=0.0;
+//            }
+//
+//        }
+//    }
+//
+//    return  outputFrame;
+//
+//}
 
 //----------------------------------------------------------------------------------------------------------------//
 // Corner detection algorithm (Harris algorithm):
@@ -2146,20 +2207,34 @@ double imageAlgorithms::calculateDC(imageData inputImage){
     vector<unsigned char>  pixelValues = inputImage.getPixelValues();
     for_each(pixelValues.begin(),pixelValues.end(), [&](unsigned char x){ energyValue += x; } );
 
-
-//    // Calculate energy
-//    for(int depthIndex = 0; depthIndex < imageDepth; depthIndex++){
-//        for(int rowIndex = 0; rowIndex < imageHeight; rowIndex++){
-//            for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
-//                energyValue += (inputImage.accessPixelValue(rowIndex,columnIndex,depthIndex));
-//            }
-//        }
-//    }
-
     // Average the energy values
     energyValue = energyValue/(imageDepth*imageHeight*imageWidth);
 
     return energyValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Subtract DC value of an image:
+matrix<int,double> imageAlgorithms::subtractDC(imageData inputImage){
+
+    // Input matrix paramters
+    double DCValue = calculateDC(inputImage);
+    int imageHeight = inputImage.getImageHeight();
+    int imageWidth = inputImage.getImageWidth();
+    int imageDepth = inputImage.getBytesPerPixel();
+    vector<unsigned char>  pixelValues = inputImage.getPixelValues();
+
+    // Set output variables
+    matrix<int,double> outputMatrix(imageHeight,imageWidth,imageDepth);
+    vector<double>  outputPixelValues;
+
+    // Subtract DC Values
+    for_each(pixelValues.begin(),pixelValues.end(),[&](unsigned char x){ outputPixelValues.push_back((double)x-DCValue);});
+
+    // Fill up matrix
+    outputMatrix.setMatrixValues(outputPixelValues);
+
+    return outputMatrix;
 }
 
 

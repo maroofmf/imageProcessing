@@ -28,6 +28,7 @@ public:
     indexDataType getHeight();
     indexDataType getDepth();
 
+    matrix<indexDataType,valueDataType> extendMatrix(indexDataType extendBy);
     double trace(matrix<indexDataType,valueDataType> inputMatrix);
     double determinant(matrix<indexDataType,valueDataType> inputMatrix);
     matrix<indexDataType,valueDataType> cofactorMatrix(matrix<indexDataType,valueDataType> inputMatrix,indexDataType row, indexDataType column);
