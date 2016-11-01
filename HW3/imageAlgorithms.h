@@ -34,6 +34,7 @@ public:
     matrix<int,unsigned char> booleanToChar(matrix<int,bool> inputMatrix);
 
     matrix<int,double>  filterApply(imageData frame, matrix<int,double>  window,string algorithm);
+    matrix<int,double>  filterApply(matrix<int,double>* frame, matrix<int,double>* window,string algorithm);
     map<int,vector<int> > harrisCornerDetector(double RThreshold);
 
     matrix<int,bool> morphologicalAlgorithms(matrix<int,bool> binaryImageData, string operation);
@@ -44,7 +45,7 @@ public:
 
     matrix<int,unsigned char> connectedComponentLabelling(matrix<int,bool> inputMatrix);
     static map<int, matrix<int,double> > getLawsFilter();
-    double imageEnergy(matrix<int,double> inputMatrix,double DC_Component);
+    double imageEnergy(matrix<int,double> inputMatrix);
     double calculateDC(imageData inputImage);
     matrix<int,double> subtractDC(imageData inputImage);
 

@@ -1165,8 +1165,8 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
 
 }
 
-//----------------------------------------------------------------------------------------------------------------//
-// II. Filter applyer:
+////----------------------------------------------------------------------------------------------------------------//
+//// II. Filter applyer:
 //matrix<int,double> imageAlgorithms::filterApply(matrix<int,double> frame, matrix<int,double> window,string algorithm){
 //
 //    // Local Variables
@@ -1176,7 +1176,7 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
 //    int extendBy = floor(windowSize/2);
 //
 //    // Test if the input is accurate
-//    if(windowSize!=window.getWidth()){
+//    if(windowSize!=window.getWidth() || windowSize%2==0){
 //        cout<< "Please re-enter the matrix! Wrong matrix size" <<endl;
 //        exit(-2);
 //    }
@@ -1189,7 +1189,7 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
 //    matrix<int,double> outputFrame(imageHeight,imageWidth,1);
 //
 //    // Extend Image
-//    imageData extendedImage = frame.extendImage(extendBy);
+//    matrix<int,double> extendedMatrix = frame.extendMatrix(extendBy);
 //    double outValue = 0.0;
 //
 //    for(int rowIndex = 0;rowIndex < imageHeight; rowIndex++){
@@ -1199,11 +1199,11 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
 //                for (int windowColumn = 0; windowColumn < windowSize; windowColumn++) {
 //
 //                    if(algorithm =="convolutionWithAbsolute"){
-//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0);
 //                    }
 //
 //                    if(algorithm=="convolutionWithoutAbsolute"){
-//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedImage.accessPixelValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+//                        outValue += window.getMatrixValues(windowRow,windowColumn,0)*extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0);
 //                    }
 //
 //                }
@@ -1226,6 +1226,60 @@ matrix<int,double> imageAlgorithms::filterApply(imageData frame, matrix<int,doub
 //
 //}
 
+//----------------------------------------------------------------------------------------------------------------//
+// II. Filter applyer:
+matrix<int,double> imageAlgorithms::filterApply(matrix<int,double>* frame, matrix<int,double>* window,string algorithm){
+
+    // Local Variables
+    int imageWidth = frame->getWidth();
+    int imageHeight = frame->getHeight();
+    int windowSize = window->getHeight();
+    int extendBy = floor(windowSize/2);
+
+    // Test if the input is accurate
+    if(windowSize!=window->getWidth() || windowSize%2==0){
+        cout<< "Please re-enter the matrix! Wrong matrix size" <<endl;
+        exit(-2);
+    }
+    if(frame->getDepth()!=1){
+        cout<< "Please re-enter the image! Wrong image size" <<endl;
+        exit(-2);
+    }
+
+    // Set input and output images
+    matrix<int,double> outputFrame(imageHeight,imageWidth,1);
+
+    // Extend Image
+    matrix<int,double> extendedMatrix = frame->extendMatrix(extendBy);
+    double outValue = 0.0;
+
+    for(int rowIndex = 0;rowIndex < imageHeight; rowIndex++){
+        for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+
+            for(int windowRow = 0;windowRow < windowSize; windowRow++) {
+                for (int windowColumn = 0; windowColumn < windowSize; windowColumn++) {
+
+                        outValue += window->getMatrixValues(windowRow,windowColumn,0)*extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0);
+
+                }
+            }
+
+            if(algorithm =="convolutionWithAbsolute"){
+                outputFrame.setMatrixValues(fabs(outValue),rowIndex,columnIndex,0);
+                outValue=0.0;
+            }
+
+            if(algorithm=="convolutionWithoutAbsolute"){
+                outputFrame.setMatrixValues(outValue,rowIndex,columnIndex,0);
+                outValue=0.0;
+            }
+
+        }
+    }
+
+    return  outputFrame;
+
+}
 //----------------------------------------------------------------------------------------------------------------//
 // Corner detection algorithm (Harris algorithm):
 // TODO: Not fully developed. Only good for this problem
@@ -2169,7 +2223,7 @@ map<int, matrix<int,double> > imageAlgorithms::getLawsFilter(){
 }
 //----------------------------------------------------------------------------------------------------------------//
 // Caluculate energy value of an image:
-double imageAlgorithms::imageEnergy(matrix<int,double> inputMatrix,double DC_Component){
+double imageAlgorithms::imageEnergy(matrix<int,double> inputMatrix){
 
     // Input matrix paramters
     double energyValue;
@@ -2177,7 +2231,7 @@ double imageAlgorithms::imageEnergy(matrix<int,double> inputMatrix,double DC_Com
     int matrixWidth = inputMatrix.getWidth();
     int matrixDepth = inputMatrix.getDepth();
     vector<double>  matrixValues = inputMatrix.getMatrixValues();
-    for_each(matrixValues.begin(),matrixValues.end(), [&](double x){ energyValue += pow(x-DC_Component,2.0); } );
+    for_each(matrixValues.begin(),matrixValues.end(), [&](double x){ energyValue += pow(x,2.0); } );
 
     // Calculate energy
 //    for(int depthIndex = 0; depthIndex < matrixDepth; depthIndex++){
