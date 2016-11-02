@@ -43,12 +43,29 @@ public:
     matrix<indexDataType,valueDataType> operator|(matrix<indexDataType,valueDataType> otherMatrix);
 
     int countNumberOfNonZero();
-
     void multiplyEachValueBy(valueDataType value);
     void zeroPad(indexDataType padBy);
     void removeZeroPadding(indexDataType paddedBy);
     valueDataType accessMatrixValue(indexDataType row,indexDataType column,indexDataType depth);
-    void printMatrix();
+    void printMatrix(string name = "matrixData");
+
+    template <class toIndexDT, class toValueDT>
+    matrix<toIndexDT,toValueDT> converter()
+    {
+        // Initialize variables
+        vector<toValueDT> outputVector;
+        matrix<toIndexDT,toValueDT> outputMatrix(matHeight,matWidth,matDepth);
+
+        // Type Cast
+        for_each(matData.begin(),matData.end(), [&](valueDataType matValue){
+            outputVector.push_back((toValueDT)matValue);
+        });
+
+        // Set values of outputMatrix
+        outputMatrix.setMatrixValues(outputVector);
+        return outputMatrix;
+    }
+
 
 private:
     indexDataType matWidth;

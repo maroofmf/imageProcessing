@@ -53,7 +53,7 @@ run:
 	rm -rf $(OUTPUTFOLDERS)
 	@echo "Running the executable files"
 	mkdir $(OUTPUTFOLDERS)
-	#./hw3_exe $(ARGS1)
+	./hw3_exe $(ARGS1)
 	#./hw3_exe $(ARGS2)
 	#./hw3_exe $(ARGS3)
 	#./hw3_exe $(ARGS4)

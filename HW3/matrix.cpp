@@ -595,21 +595,21 @@ valueDataType matrix<indexDataType,valueDataType>::accessMatrixValue(indexDataTy
 //----------------------------------------------------------------------------------------------------------------//
 // Print matrix in text file
 template <class indexDataType, class valueDataType>
-void matrix<indexDataType,valueDataType>::printMatrix(){
+void matrix<indexDataType,valueDataType>::printMatrix(string name){
 
 
     static int fileNumber = 1;
     // Open text file
     ofstream outputFile;
-    string outputFileName = "metadata/matrixData"+to_string(fileNumber++)+".txt";
+    string outputFileName = "metadata/"+ name + to_string(fileNumber++)+".txt";
     outputFile.open (outputFileName, ofstream::out | ofstream::app);
 
     for(indexDataType depthIndex = 0; depthIndex < matDepth; depthIndex++) {
         for (indexDataType rowIndex = 0; rowIndex < matHeight; rowIndex++) {
             for (indexDataType columnIndex = 0; columnIndex < matWidth; columnIndex++) {
 
-                outputFile <<  (double)matData[rowIndex * matWidth * matDepth + columnIndex * matDepth + depthIndex] <<
-                "\t";
+                outputFile <<  matData[rowIndex * matWidth * matDepth + columnIndex * matDepth + depthIndex] <<
+                "\t\t";
             }
             outputFile << "\n";
         }
@@ -619,6 +619,26 @@ void matrix<indexDataType,valueDataType>::printMatrix(){
     outputFile.close();
 
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Change data types:
+//template <class indexDataType, class valueDataType>
+//template <class toIndexDT, class toValueDT>
+//matrix<toIndexDT,toValueDT> matrix<indexDataType,valueDataType>::converter(){
+//
+////     Initialize variables
+//    vector<toValueDT> outputVector;
+//    matrix<toIndexDT,toValueDT> outputMatrix(matHeight,matWidth,matDepth);
+//
+//    // Type Cast
+//    for_each(matData.begin(),matData.end(), [&](valueDataType matValue){
+//        outputVector.push_back((toValueDT)matValue);
+//    });
+//
+//    // Set values of outputMatrix
+//    outputMatrix.setMatrixValues(outputVector);
+//    return outputMatrix;
+//}
 //----------------------------------------------------------------------------------------------------------------//
 // Acceptable templates
 

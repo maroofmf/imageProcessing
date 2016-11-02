@@ -777,8 +777,26 @@ void imageData::saveBinaryImage(const char* outputFileName){
     fwrite(&convertedPixelData[0], sizeof(unsigned char), imageWidth*imageHeight*BytesPerPixel, outputFile);
     fclose(outputFile);
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Display Image:
+void imageData::displayImage(string name){
+
+    // Input variables
+    Mat src = convertToMat();
+    static int imageNumber = 0;
+    name = name + "_"+to_string(imageNumber++);
+
+    // Display image
+    namedWindow(name, WINDOW_AUTOSIZE);
+    imshow(name, src);
+    waitKey(0);
+}
+
+
 //----------------------------------------------------------------------------------------------------------------//
 // Convert an image to Mat file
+
 Mat imageData::convertToMat(){
 
     // Test for number of channels
