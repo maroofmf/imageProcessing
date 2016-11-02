@@ -9,14 +9,19 @@ LIBS = `pkg-config --libs opencv`
 OUTPUTFOLDERS = metadata p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_output p2_c_output p1_a_output p1_b_output p1_c_output
 
 # List of arguments:
+# Format: $(PATH_TO_INPUT_IMAGE) $(OUTPUT_RAW_FILENAME) $(CHANNELS) $(IMAGE_WIDTH) $(IMAGE_HEIGHT) $(PROBLEM_NUMBER) $(ADDITIONAL_ARGUMENTS)
+
 ARGS1 = HW3\ Images/P1/Texture.raw texture 1 128 128 1 12
-ARGS2 = HW3\ Images/P2/jeep.jpg jeepOut 3 500 380 4
-ARGS3 = HW3\ Images/P3/Zebra.raw zebraOut 3 481 321 5
-ARGS4 = HW\ 2\ images/Kitten_2.raw kitten_2_out 3 300 300 1
-ARGS4 = HW\ 2\ images/piece.raw piece_out 3 500 500 2 HW\ 2\ images/Hillary.raw HW\ 2\ images/Trump.raw 3 512 512
-ARGS5 = HW\ 2\ images/field.raw field_out 3 972 648 3 HW\ 2\ images/tartans.raw HW\ 2\ images/trojans.raw 3 350 146
-ARGS6 = HW\ 2\ images/Rice.raw rice_out 3 690 500 5
-ARGS7 = HW\ 2\ images/Butterfly.raw mpeg_out 1 335 320 6 HW\ 2\ images/Fly.raw 1 222 223 HW\ 2\ images/Probe.raw 1 496 502
+ARGS2 = HW3\ Images/P1/Comb_1.raw combOut_1 1 500 425 2
+ARGS3 = HW3\ Images/P1/Comb_2.raw combOut_2 1 512 512 2
+ARGS4 = HW3\ Images/P1/Comb_2.raw combOut_2 1 512 512 3
+ARGS5 = HW3\ Images/P2/jeep.jpg jeepOut 3 500 380 4
+ARGS5 = HW3\ Images/P2/bus.jpg busOut 3 450 248 4
+ARGS6 = HW3\ Images/P2/ matchOut 3 500 256 5
+ARGS7 = HW3\ Images/P2/ matchOut 3 500 256 6
+ARGS8 = HW3\ Images/P3/Zebra.raw zebraOut 3 481 321 7
+ARGS9 = HW3\ Images/P3/Jaguar.raw jaguarOut 3 481 321 7
+ARGS10 = HW3\ Images/P3/ SEOut 3 481 321 8
 
 # Code Execution:
 all: hw3_exe run
@@ -50,13 +55,15 @@ run:
 	mkdir $(OUTPUTFOLDERS)
 	#./hw3_exe $(ARGS1)
 	#./hw3_exe $(ARGS2)
-	./hw3_exe $(ARGS3)
-	#./hw2_exe $(ARGS4)
-	#./hw2_exe $(ARGS5)
-	#./hw2_exe $(ARGS6)
-	#./hw2_exe $(ARGS7)
+	#./hw3_exe $(ARGS3)
+	#./hw3_exe $(ARGS4)
+	#./hw3_exe $(ARGS5)
+	#./hw3_exe $(ARGS6)
+	#./hw3_exe $(ARGS7)
+	#./hw3_exe $(ARGS8)
+	#./hw3_exe $(ARGS9)
+	#./hw3_exe $(ARGS10)
 
 timeit:
 	@echo "Timing the code"
 	valgrind --tool=callgrind ./hw3_exe $(ARGS1)
-

@@ -11,7 +11,7 @@
 
 ## Guidelines for running the code:
 
-* This code uses opencv 3.1. Make sure it is installed on your computer.
+* This code uses opencv 2.4.13.
 * The input folder (HW3 Images) from the question should be included
 seperately in the source folder. Please note that the paths for images
 are passed to the program.
@@ -35,5 +35,3 @@ this, please find "libippicv.a" in your system by running:
 link it to /usr/local/lib by running:  
 > ln -s OUTPUT_FIND /usr/local/lib/
 * Make sure to replace OUTPUT_FIND with the result in the previous step!
-
-

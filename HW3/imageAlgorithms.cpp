@@ -2,17 +2,7 @@
 // Created by Maroof Mohammed Farooq on 9/11/16.
 //
 
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include <vector>
-#include <fstream>
-#include <iterator>
-#include <math.h>
-#include <map>
-#include <string>
-#include <numeric>
-#include <algorithm>
+#include "headers.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "imageData.h"

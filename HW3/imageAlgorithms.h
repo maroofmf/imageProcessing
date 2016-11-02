@@ -5,8 +5,8 @@
 #ifndef CPP_IMAGEALGORITHMS_H
 #define CPP_IMAGEALGORITHMS_H
 
+#include "headers.h"
 #include "matrix.h"
-#include <map>
 
 using namespace std;
 

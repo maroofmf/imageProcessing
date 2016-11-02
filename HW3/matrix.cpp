@@ -10,17 +10,7 @@
  */
 
 // Header files
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include <vector>
-#include <fstream>
-#include <iterator>
-#include <math.h>
-#include <map>
-#include <stdarg.h>
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
+#include "headers.h"
 #include "imageData.h"
 #include "imageAlgorithms.h"
 #include "matrix.h"
