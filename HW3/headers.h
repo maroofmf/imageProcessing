@@ -26,5 +26,6 @@
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/nonfree/nonfree.hpp"
+#include <opencv2/opencv.hpp>
 
 #endif //HW_HEADERS_H

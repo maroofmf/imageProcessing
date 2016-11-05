@@ -5,7 +5,10 @@
 #ifndef CPP_MATRIX_H
 #define CPP_MATRIX_H
 
+#include "headers.h"
+
 using namespace std;
+using namespace cv;
 
 template <class indexDataType, class valueDataType>
 class matrix{
@@ -48,7 +51,27 @@ public:
     void removeZeroPadding(indexDataType paddedBy);
     valueDataType accessMatrixValue(indexDataType row,indexDataType column,indexDataType depth);
     void printMatrix(string name = "matrixData");
+    void printForMatlab(string name= "matlabData");
 
+    //------------------- Templated Functions -------------------------------//
+
+    //------------------------ Mat to matrix -----------------------------------//
+    template <class returnIndexDT, class returnValueDT>
+    matrix<returnIndexDT,returnValueDT> mat2matrix(Mat inputFile){
+
+        // Set local variables
+        matrix<returnIndexDT, returnValueDT> outMatrix(inputFile.rows,inputFile.cols,1);
+
+        for(int rowIndex = 0; rowIndex< inputFile.rows; rowIndex++){
+            for(int columnIndex = 0; columnIndex < inputFile.cols; columnIndex++){
+                outMatrix.setMatrixValues(inputFile.at<valueDataType>(rowIndex,columnIndex),rowIndex,columnIndex,0);
+            }
+        }
+        return outMatrix;
+    }
+
+
+    //------------------------ Type caster -----------------------------------//
     template <class toIndexDT, class toValueDT>
     matrix<toIndexDT,toValueDT> converter()
     {

@@ -2280,7 +2280,48 @@ matrix<int,double> imageAlgorithms::subtractDC(imageData inputImage){
 
     return outputMatrix;
 }
+//----------------------------------------------------------------------------------------------------------------//
+// II. Energy per pixel:
+Mat imageAlgorithms::energyPerPixel(matrix<int,double>* frame,int windowSize){
 
+    // Local Variables
+    int imageWidth = frame->getWidth();
+    int imageHeight = frame->getHeight();
+    int extendBy = floor(windowSize/2);
+
+    if(frame->getDepth()!=1){
+        cout<< "Please re-enter the image! Wrong image size" <<endl;
+        exit(-2);
+    }
+
+    // Set output images
+    Mat outputFrame(imageHeight*imageWidth,1,CV_32F);
+
+    // Extend Image
+    matrix<int,double> extendedMatrix = frame->extendMatrix(extendBy);
+    double outValue = 0.0;
+
+    for(int rowIndex = 0;rowIndex < imageHeight; rowIndex++){
+        for(int columnIndex = 0; columnIndex < imageWidth; columnIndex++){
+
+            for(int windowRow = 0;windowRow < windowSize; windowRow++) {
+                for (int windowColumn = 0; windowColumn < windowSize; windowColumn++) {
+
+                    outValue += pow(extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0),2.0);
+
+                }
+            }
+
+            outValue = outValue/(windowSize*windowSize);
+            outputFrame.at<float>(rowIndex*imageWidth+columnIndex,0) = outValue;
+            outValue=0.0;
+
+        }
+    }
+
+    return  outputFrame;
+
+}
 
 
 

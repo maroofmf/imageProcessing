@@ -30,6 +30,9 @@ given below:
 * Harris corner detection
 
 ####**HW3:**
-
+* Texture Classification using Laws filter and K means
+* Texture Segmentation
+* Salient Point extraction and description using SIFT and SURF
+* Image Matching using SIFT and SURF features
 
 

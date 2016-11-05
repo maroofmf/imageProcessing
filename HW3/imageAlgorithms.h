@@ -48,6 +48,7 @@ public:
     double imageEnergy(matrix<int,double> inputMatrix);
     double calculateDC(imageData inputImage);
     matrix<int,double> subtractDC(imageData inputImage);
+    Mat energyPerPixel(matrix<int,double>* frame,int windowSize);
 
 private:
     imageData* imageObject;

@@ -621,6 +621,45 @@ void matrix<indexDataType,valueDataType>::printMatrix(string name){
 }
 
 //----------------------------------------------------------------------------------------------------------------//
+// Print matrix usable in matlab
+template <class indexDataType, class valueDataType>
+void matrix<indexDataType,valueDataType>::printForMatlab(string name){
+
+
+    static int fileNumber = 1;
+    // Open text file
+    ofstream outputFile;
+    string outputFileName = "metadata/"+ name + to_string(fileNumber++)+".txt";
+    outputFile.open (outputFileName, ofstream::out | ofstream::app);
+
+    // Open brackets
+    outputFile << "[";
+
+    for(indexDataType depthIndex = 0; depthIndex < matDepth; depthIndex++) {
+        for (indexDataType rowIndex = 0; rowIndex < matHeight; rowIndex++) {
+            for (indexDataType columnIndex = 0; columnIndex < matWidth; columnIndex++) {
+
+                outputFile <<  matData[rowIndex * matWidth * matDepth + columnIndex * matDepth + depthIndex] <<
+                "\t";
+            }
+
+            if(rowIndex!=matHeight-1) {
+                outputFile << ";";
+            }
+        }
+
+        outputFile << "]";
+        outputFile << "\n \n";
+        if(depthIndex!=matDepth-1) {
+            outputFile << "[";
+        }
+    }
+
+    outputFile.close();
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
 // Change data types:
 //template <class indexDataType, class valueDataType>
 //template <class toIndexDT, class toValueDT>

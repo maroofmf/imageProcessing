@@ -857,3 +857,10 @@ void imageData::saveImage(const char* outputFileName){
     fclose(outputFile);
 }
 //----------------------------------------------------------------------------------------------------------------//
+// Save image to .jpg file
+
+void imageData::saveAsJpg(string outputFileName){
+
+    Mat outputImage = convertToMat();
+    imwrite(outputFileName,outputImage);
+}

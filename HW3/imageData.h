@@ -56,8 +56,10 @@ public:
     void saveBinaryImage(const char* outputFileName);
     void displayImage(string name = "Input");
     Mat convertToMat();
-    void saveImage(const char* outputFileName);
     void imageRead(const char* inputFileName);
+    void saveImage(const char* outputFileName);
+    void saveAsJpg(string outputFileName);
+
 
 private:
     int BytesPerPixel;
