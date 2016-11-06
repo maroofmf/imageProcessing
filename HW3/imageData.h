@@ -57,6 +57,7 @@ public:
     void displayImage(string name = "Input");
     Mat convertToMat();
     void imageRead(const char* inputFileName);
+    void readJPG(string inputFileName);
     void saveImage(const char* outputFileName);
     void saveAsJpg(string outputFileName);
 

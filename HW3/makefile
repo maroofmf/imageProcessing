@@ -21,7 +21,7 @@ ARGS7 = HW3\ Images/P2/ matchOut 3 500 256 5
 ARGS8 = HW3\ Images/P2/ matchOut 3 500 256 6
 ARGS9 = HW3\ Images/P3/Zebra.raw zebraOut 3 481 321 7
 ARGS10 = HW3\ Images/P3/Jaguar.raw jaguarOut 3 481 321 7
-ARGS11 = HW3\ Images/P3/ SEOut 3 481 321 8
+ARGS11 = HW3\ Images/P3/Elephant.raw SEOut 3 481 321 8
 
 # Code Execution:
 all: hw3_exe run
@@ -59,10 +59,11 @@ run:
 	#./hw3_exe $(ARGS4)
 	#./hw3_exe $(ARGS5)
 	#./hw3_exe $(ARGS6)
-	./hw3_exe $(ARGS7)
+	#./hw3_exe $(ARGS7)
 	#./hw3_exe $(ARGS8)
-	#./hw3_exe $(ARGS9)
-	#./hw3_exe $(ARGS10)
+	./hw3_exe $(ARGS9)
+	./hw3_exe $(ARGS10)
+	#./hw3_exe $(ARGS11)
 
 timeit:
 	@echo "Timing the code"

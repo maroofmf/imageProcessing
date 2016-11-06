@@ -13,6 +13,7 @@ using namespace std;
 class imageAlgorithms{
 public:
     imageAlgorithms(imageData* imageObject1);
+    imageAlgorithms(){};
     ~imageAlgorithms(void);
 
     unsigned char bilinearInterpolation(double rowIndex, double columnIndex,double depthIndex=0.0);
@@ -42,13 +43,23 @@ public:
     matrix<int,bool> dilation_holeFilling(matrix<int,bool> seedMatrix, matrix<int,bool> inputMatrix);
     matrix<int,bool> dilation(matrix<int,bool> inputMatrix, int numberOfIter);
     matrix<int,bool> erosion(matrix<int,bool> inputMatrix, int numberOfIter);
-
     matrix<int,unsigned char> connectedComponentLabelling(matrix<int,bool> inputMatrix);
+
     static map<int, matrix<int,double> > getLawsFilter();
     double imageEnergy(matrix<int,double> inputMatrix);
     double calculateDC(imageData inputImage);
     matrix<int,double> subtractDC(imageData inputImage);
     Mat energyPerPixel(matrix<int,double>* frame,int windowSize);
+
+    void saveSalientPoints(string inputFileName, string outputFileName);
+    void featureMatching(Mat image1, Mat image2,string outputFileName, int thresh = 2);
+    void auto_cannyEdge(double sigma = 0.33);
+
+    void addDescriptor(Mat inputImage,BOWKMeansTrainer& trainer);
+    Mat bowHistgramValues(Mat image1, BOWImgDescriptorExtractor& dextract);
+    Mat compareUsingBOW(vector<Mat> trainImages, vector<Mat> testImages, BOWImgDescriptorExtractor& dextract);
+
+    float chisquareStatistic(Mat hist1, Mat his2);
 
 private:
     imageData* imageObject;

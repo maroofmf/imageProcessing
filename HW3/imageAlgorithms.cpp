@@ -2308,6 +2308,7 @@ Mat imageAlgorithms::energyPerPixel(matrix<int,double>* frame,int windowSize){
                 for (int windowColumn = 0; windowColumn < windowSize; windowColumn++) {
 
                     outValue += pow(extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0),2.0);
+//                    outValue += abs(extendedMatrix.accessMatrixValue(rowIndex+windowRow,columnIndex+windowColumn,0));
 
                 }
             }
@@ -2322,6 +2323,250 @@ Mat imageAlgorithms::energyPerPixel(matrix<int,double>* frame,int windowSize){
     return  outputFrame;
 
 }
+//----------------------------------------------------------------------------------------------------------------//
+// Save sift and surf points
+void imageAlgorithms::saveSalientPoints(string inputFileName, string outputFileName){
+
+    Mat inputImage = imread(inputFileName, 0);
+
+    // Initialize Sift and Surf feature extractor:
+    SiftFeatureDetector siftDetector;
+    SurfFeatureDetector surfDetector;
+    vector <KeyPoint> keyPoints_sift, keyPoints_surf;
+
+    // Detect points of interest
+    siftDetector.detect(inputImage, keyPoints_sift);
+    surfDetector.detect(inputImage,keyPoints_surf);
+
+    // Display key points
+    Mat outputImage_sift, outputImage_surf;
+    drawKeypoints(inputImage, keyPoints_sift, outputImage_sift);
+    drawKeypoints(inputImage, keyPoints_surf, outputImage_surf);
+
+    // Save Images
+    imwrite(outputFileName+"_sift.jpg",outputImage_sift);
+    imwrite(outputFileName+"_surf.jpg",outputImage_surf);
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Save sift and surf matching:
+
+void imageAlgorithms::featureMatching(Mat image1, Mat image2,string outputFileName, int thresh) {
+
+    // Declaring variables
+    static int matchNumber = 0;
+
+    // Initialize Sift and Surf feature extractor:
+    SiftFeatureDetector siftDetector;
+    SurfFeatureDetector surfDetector;
+    vector <KeyPoint> image1_siftPoints, image1_surfPoints;
+    vector <KeyPoint> image2_siftPoints, image2_surfPoints;
+
+    // Detect points of interest
+    siftDetector.detect(image1, image1_siftPoints);
+    surfDetector.detect(image1,image1_surfPoints);
+    siftDetector.detect(image2, image2_siftPoints);
+    surfDetector.detect(image2,image2_surfPoints);
+
+    // Calculate descriptors
+    SiftDescriptorExtractor siftExtractor;
+    SurfDescriptorExtractor surfExtractor;
+
+    // Descriptors
+    Mat image1_siftDescriptors, image1_surfDescriptors;
+    Mat image2_siftDescriptors, image2_surfDescriptors;
+
+    siftExtractor.compute(image1,image1_siftPoints,image1_siftDescriptors);
+    surfExtractor.compute(image1,image1_surfPoints,image1_surfDescriptors);
+
+    siftExtractor.compute(image2,image2_siftPoints,image2_siftDescriptors);
+    surfExtractor.compute(image2,image2_surfPoints,image2_surfDescriptors);
+
+    // Matching RAV4_1 and RAV4_2
+    BFMatcher matcher;
+    vector<DMatch> siftMatches, surfMatches;
+    matcher.match( image1_siftDescriptors, image2_siftDescriptors, siftMatches );
+    matcher.match(image1_surfDescriptors, image2_surfDescriptors, surfMatches);
+
+    // Calculating min and max distance of sift descriptors:
+    double maxSift = 0; double minSift = 100;
+    for( int i = 0; i < image1_siftDescriptors.rows; i++ )
+    { double dist = siftMatches[i].distance;
+        if( dist < minSift ) minSift = dist;
+        if( dist > maxSift ) maxSift = dist;
+    }
+
+    // Calculating min and max distance of surf descriptors:
+    double maxSurf = 0; double minSurf = 100;
+    for( int i = 0; i < image1_surfDescriptors.rows; i++ )
+    { double dist = surfMatches[i].distance;
+        if( dist < minSurf ) minSurf = dist;
+        if( dist > maxSurf ) maxSurf = dist;
+    }
+
+    // Finding good matches
+    vector< DMatch > good_matches_sift, good_matches_surf;
+
+    for( int i = 0; i < image1_siftDescriptors.rows; i++ )
+    { if( siftMatches[i].distance <= thresh*minSift )
+        { good_matches_sift.push_back( siftMatches[i]); }
+    }
+
+    for( int i = 0; i < image1_surfDescriptors.rows; i++ )
+    { if( surfMatches[i].distance <= thresh*minSurf )
+        { good_matches_surf.push_back( surfMatches[i]); }
+    }
+
+    // Save SIFT matches
+    Mat img_matches_sift;
+    drawMatches( image1, image1_siftPoints, image2, image2_siftPoints,
+                 good_matches_sift, img_matches_sift, Scalar::all(-1), Scalar::all(-1),
+                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+
+    imwrite( outputFileName+to_string(matchNumber)+"_sift.jpg",img_matches_sift );
+
+    // Save SURF Matches:
+
+    Mat img_matches_surf;
+    drawMatches( image1, image1_surfPoints, image2, image2_surfPoints,
+                 good_matches_surf, img_matches_surf, Scalar::all(-1), Scalar::all(-1),
+                 vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+
+    imwrite( outputFileName+to_string(matchNumber++)+"_surf.jpg",img_matches_surf );
+
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Canny edge detector:
+
+void imageAlgorithms::auto_cannyEdge(double sigma){
+
+    // Local variables
+    int imageHeight = imageObject->getImageHeight();
+    int imageWidth = imageObject->getImageWidth();
+    imageData grayImage = imageObject->colorToGrayscale();
+    vector<unsigned char> pixelData = grayImage.getPixelValues();
+    Mat outputMatImage(imageHeight,imageWidth,CV_8UC1);
+
+    // Convert to Gray image
+    Mat grayMatImage = grayImage.convertToMat();
+
+    // Compute lower and upper threshold:
+    nth_element(pixelData.begin(),pixelData.begin()+pixelData.size()/2,pixelData.end());
+    double medianValue = pixelData[pixelData.size()/2];
+    int lowerThreshold = max(0.0,(1.0-sigma)*medianValue);
+    int upperThreshold = min(255.0,(1.0+sigma)*medianValue);
+
+//    Mat _img;
+//    int upperThreshold = threshold(grayMatImage, _img, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+//    int lowerThreshold = 0.5*upperThreshold;
+
+    cout<< upperThreshold<< " "<< lowerThreshold<<endl;
+
+    Canny(grayMatImage,outputMatImage,lowerThreshold, upperThreshold);
+
+    // Display image
+    namedWindow("Image", WINDOW_AUTOSIZE);
+    imshow("Image", outputMatImage);
+    waitKey(0);
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Add Descriptors for BOW:
+void imageAlgorithms::addDescriptor(Mat image1, BOWKMeansTrainer& trainer){
+
+    // Initialize Sift and Surf feature extractor:
+    SiftFeatureDetector siftDetector;
+    vector <KeyPoint> image1_siftPoints;
+
+    // Detect points of interest
+    siftDetector.detect(image1, image1_siftPoints);
+
+    // Calculate descriptors
+    SiftDescriptorExtractor siftExtractor;
+
+    // Descriptors
+    Mat image1_siftDescriptors;
+    siftExtractor.compute(image1,image1_siftPoints,image1_siftDescriptors);
+
+    trainer.add(image1_siftDescriptors);
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Compute BOW histogram values:
+Mat imageAlgorithms::bowHistgramValues(Mat image1, BOWImgDescriptorExtractor& dextract){
+
+    // Initialize Sift and Surf feature extractor:
+    SiftFeatureDetector siftDetector;
+    vector <KeyPoint> image1_siftPoints;
+
+    // Detect points of interest
+    siftDetector.detect(image1, image1_siftPoints);
+
+    Mat histValues;
+    dextract.compute(image1, image1_siftPoints, histValues );
+    return histValues;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Compare test and training images using Bag of Words:
+Mat imageAlgorithms::compareUsingBOW(vector<Mat> trainImages, vector<Mat> testImages, BOWImgDescriptorExtractor& dextract){
+
+    // Set input variables
+    Mat hypothesisValues(trainImages.size(),testImages.size(),CV_32F);
+    vector<Mat> trainingHist, testingHist;
+    Mat temp;
+
+    // Compute the histogram for training
+    for_each(trainImages.begin(),trainImages.end(), [&](Mat inputTrainImage){
+        trainingHist.push_back(bowHistgramValues(inputTrainImage,dextract));
+    });
+
+    // Compute the histogram for test
+    for_each(testImages.begin(),testImages.end(), [&](Mat inputTestImage){
+        testingHist.push_back(bowHistgramValues(inputTestImage,dextract));
+    });
+
+    // Compute chi square values:
+    int testIndex = 0;
+    for_each(testingHist.begin(),testingHist.end(), [&](Mat testHist){
+
+        float statisticValue = 0;
+        int trainIndex = 0;
+        for_each(trainingHist.begin(),trainingHist.end(), [&](Mat trainHist){
+            statisticValue = chisquareStatistic(testHist,trainHist);
+            hypothesisValues.at<float>(trainIndex++,testIndex)=statisticValue;
+        });
+        testIndex++;
+
+    });
+
+    return hypothesisValues;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------//
+// Compare histograms:
+
+float imageAlgorithms::chisquareStatistic(Mat hist1, Mat hist2){
+
+    float statisticValue = 0;
+
+    for(int columnIndex = 0; columnIndex < hist1.cols; columnIndex++){
+        statisticValue += pow((hist1.at<float>(0,columnIndex) - hist2.at<float>(0,columnIndex)),2.0)/(hist1.at<float>(0,columnIndex) + hist2.at<float>(0,columnIndex));
+    }
+
+    return statisticValue/2.0;
+}
+
+
+
+
+
 
 
 

@@ -67,13 +67,16 @@ void matrix<indexDataType,valueDataType>::setMatrixValues(vector<valueDataType> 
 template <class indexDataType, class valueDataType>
 void matrix<indexDataType,valueDataType>::setMatrixValues(imageData inputImage,indexDataType startRow,indexDataType startColumn, indexDataType startDepth, indexDataType totalDepth){
 
+    vector<valueDataType> localData;
     for(indexDataType rowIndex = startRow; rowIndex< startRow+matHeight; rowIndex++){
         for(indexDataType columnIndex = startColumn; columnIndex< startColumn+matWidth; columnIndex++){
             for(indexDataType depthIndex = startDepth; depthIndex < startDepth+totalDepth; depthIndex++){
-                matData.push_back(inputImage.getPixelValues((int)rowIndex,(int)columnIndex,(int)depthIndex));
+                localData.push_back((valueDataType)inputImage.getPixelValues((int)rowIndex,(int)columnIndex,(int)depthIndex));
             }
         }
     }
+
+    setMatrixValues(localData);
 }
 //----------------------------------------------------------------------------------------------------------------//
 // Setter matrix values for row,col and depth

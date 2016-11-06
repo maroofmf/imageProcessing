@@ -844,6 +844,36 @@ void imageData::imageRead(const char* inputFileName){
     fread(&pixelData[0], sizeof(unsigned char), imageWidth*imageHeight*BytesPerPixel, inputFile);
     fclose(inputFile);
 }
+
+//----------------------------------------------------------------------------------------------------------------//
+// Load jpg
+//void imageData::readJPG(string inputFileName){
+//
+//    // Test
+//    if(BytesPerPixel !=1){
+//        cout<< "Only Gray level supported"<<endl;
+//        exit(0);
+//    }
+//
+//    // Save data
+//    Mat inputImage = imread(inputFileName);
+//
+//    cout<< (int)inputImage.at<unsigned char>(0,0) <<endl;
+//    exit(0);
+//    imageData newImage(1,inputImage.cols, inputImage.rows);
+//
+//
+//    for(int rowIndex = 0; rowIndex < inputImage.rows; rowIndex++){
+//        for(int columnIndex = 0; columnIndex < inputImage.cols; columnIndex++){
+//            newImage.setPixelValues(inputImage.at<unsigned char>(rowIndex,columnIndex),rowIndex,columnIndex,0);
+//        }
+//    }
+//
+//    newImage.displayImage();
+//    exit(0);
+//
+//}
+
 //----------------------------------------------------------------------------------------------------------------//
 // Save image to .raw file
 void imageData::saveImage(const char* outputFileName){
