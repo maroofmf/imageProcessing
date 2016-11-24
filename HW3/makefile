@@ -12,8 +12,8 @@ OUTPUTFOLDERS = metadata p3_a_output p3_b_output p3_c_output  p2_a_output p2_b_o
 # Format: $(PATH_TO_INPUT_IMAGE) $(OUTPUT_RAW_FILENAME) $(CHANNELS) $(IMAGE_WIDTH) $(IMAGE_HEIGHT) $(PROBLEM_NUMBER) $(ADDITIONAL_ARGUMENTS)
 
 ARGS1 = HW3\ Images/P1/Texture.raw texture 1 128 128 1 12
-ARGS2 = HW3\ Images/P1/Comb_1.raw combOut_1 1 500 425 2
-ARGS3 = HW3\ Images/P1/Comb_2.raw combOut_2 1 512 512 2
+ARGS2 = HW3\ Images/P1/Comb_1.raw combOut_1 1 500 425 2 4
+ARGS3 = HW3\ Images/P1/Comb_2.raw combOut_2 1 512 512 2 6
 ARGS4 = HW3\ Images/P1/Comb_2.raw combOut_2 1 512 512 3
 ARGS5 = HW3\ Images/P2/jeep.jpg jeepOut 3 500 380 4
 ARGS6 = HW3\ Images/P2/bus.jpg busOut 3 450 248 4
@@ -53,17 +53,16 @@ run:
 	rm -rf $(OUTPUTFOLDERS)
 	@echo "Running the executable files"
 	mkdir $(OUTPUTFOLDERS)
-	#./hw3_exe $(ARGS1)
-	#./hw3_exe $(ARGS2)
-	#./hw3_exe $(ARGS3)
-	#./hw3_exe $(ARGS4)
-	#./hw3_exe $(ARGS5)
-	#./hw3_exe $(ARGS6)
-	#./hw3_exe $(ARGS7)
-	#./hw3_exe $(ARGS8)
+	./hw3_exe $(ARGS1)
+	./hw3_exe $(ARGS2)
+	./hw3_exe $(ARGS3)
+	./hw3_exe $(ARGS5)
+	./hw3_exe $(ARGS6)
+	./hw3_exe $(ARGS7)
+	./hw3_exe $(ARGS8)
 	./hw3_exe $(ARGS9)
 	./hw3_exe $(ARGS10)
-	#./hw3_exe $(ARGS11)
+	./hw3_exe $(ARGS11)
 
 timeit:
 	@echo "Timing the code"

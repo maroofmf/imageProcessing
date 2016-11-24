@@ -2441,7 +2441,7 @@ void imageAlgorithms::featureMatching(Mat image1, Mat image2,string outputFileNa
 //----------------------------------------------------------------------------------------------------------------//
 // Canny edge detector:
 
-void imageAlgorithms::auto_cannyEdge(double sigma){
+Mat imageAlgorithms::auto_cannyEdge(double sigma){
 
     // Local variables
     int imageHeight = imageObject->getImageHeight();
@@ -2456,22 +2456,23 @@ void imageAlgorithms::auto_cannyEdge(double sigma){
     // Compute lower and upper threshold:
     nth_element(pixelData.begin(),pixelData.begin()+pixelData.size()/2,pixelData.end());
     double medianValue = pixelData[pixelData.size()/2];
-    int lowerThreshold = max(0.0,(1.0-sigma)*medianValue);
-    int upperThreshold = min(255.0,(1.0+sigma)*medianValue);
+//    int lowerThreshold = max(0.0,(1.0-sigma)*medianValue);
+//    int upperThreshold = min(255.0,(1.0+sigma)*medianValue);
 
 //    Mat _img;
 //    int upperThreshold = threshold(grayMatImage, _img, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 //    int lowerThreshold = 0.5*upperThreshold;
 
+    int upperThreshold = 150;
+    int lowerThreshold = 50;
+
     cout<< upperThreshold<< " "<< lowerThreshold<<endl;
 
-    Canny(grayMatImage,outputMatImage,lowerThreshold, upperThreshold);
+    blur(grayMatImage,grayMatImage,Size(3,3));
 
-    // Display image
-    namedWindow("Image", WINDOW_AUTOSIZE);
-    imshow("Image", outputMatImage);
-    waitKey(0);
+    Canny(grayMatImage,outputMatImage,lowerThreshold, upperThreshold,3,true);
 
+    return outputMatImage;
 }
 
 //----------------------------------------------------------------------------------------------------------------//

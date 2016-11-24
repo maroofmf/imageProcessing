@@ -53,7 +53,7 @@ public:
 
     void saveSalientPoints(string inputFileName, string outputFileName);
     void featureMatching(Mat image1, Mat image2,string outputFileName, int thresh = 2);
-    void auto_cannyEdge(double sigma = 0.33);
+    Mat auto_cannyEdge(double sigma = 0.33);
 
     void addDescriptor(Mat inputImage,BOWKMeansTrainer& trainer);
     Mat bowHistgramValues(Mat image1, BOWImgDescriptorExtractor& dextract);
