@@ -1,0 +1,105 @@
+-- Name: Maroof Mohammed Farooq
+-- Project 4
+-- USC
+-------------------------------------------------------------------------
+-- Initialize packages
+
+require 'nn'
+require 'optim'
+require 'image'
+
+-------------------------------------------------------------------------
+-- Load training and testing DataSet
+
+torch.manualSeed(0);
+training_dataSet = torch.load('mnist-p1b-train.t7');
+testing_dataSet = torch.load('mnist-p1b-test.t7');
+X_train = training_dataSet.data:clone();
+y_train = training_dataSet.label:clone();
+X_test = testing_dataSet.data:clone();
+y_test = testing_dataSet.data:clone();
+
+-------------------------------------------------------------------------
+-- Develop the network
+
+network = nn.Sequential();
+
+-- View Layer:
+network:add(nn.View(1,1,32,32))
+
+-- First Layer
+network:add(nn.SpatialConvolution(1,6,5,5));
+network:add(nn.ReLU());
+network:add(nn.SpatialMaxPooling(2,2,2,2))
+
+-- Second Layer
+network:add(nn.SpatialConvolution(6,16,5,5));
+network:add(nn.ReLU());
+network:add(nn.SpatialMaxPooling(2,2,2,2))
+
+-- View Layer
+network:add(nn.View(16*5*5))
+
+-- Fully Connected Layer 1:
+network:add(nn.Linear(16*5*5,120))
+network:add(nn.ReLU())
+
+-- Fully Connected Layer 1:
+network:add(nn.Linear(120,84))
+network:add(nn.ReLU())
+
+-- Output Layer:
+network:add(nn.Linear(84,10));
+network:add(nn.LogSoftMax());
+
+print('LeNet-5 \n' .. network:__tostring());
+
+-------------------------------------------------------------------------
+-- Define cost function:
+
+criterion = nn.ClassNLLCriterion();
+
+-------------------------------------------------------------------------
+-- Training
+
+numberOfEpochs = 10;
+trainingSize = X_train:size(1)
+modelParams,gradParams = network:getParameters()
+config = {learningRate = 0.15}
+
+for epochNumber = 1,numberOfEpochs do
+	local batchSize = 1;
+	local totalLoss = 0;
+
+	for iteration = 1,trainingSize,batchSize do
+		batchSize_new = math.min(trainingSize-iteration,batchSize)
+		local trainingBatch = X_train:narrow(1,iteration,batchSize_new)
+		local labelBatch = y_train:narrow(1,iteration,batchSize_new)		
+
+		function feval(inputValues) 
+			gradParams:zero()
+			local networkOutput = network:forward(trainingBatch:double())
+			local errorValue = criterion:forward(networkOutput, labelBatch:double())
+			totalLoss = totalLoss + batchSize_new*errorValue;
+			local gradOutput = criterion:backward(networkOutput, labelBatch:double())
+			local gradInput = network:backward(trainingBatch,gradOutput)
+			return errorValue,gradParams
+		end
+		
+		optim.sgd(feval,modelParams, config)
+			
+	end
+	
+	totalLoss = totalLoss/ trainingSize;
+	print(string.format('epoch = %2d/%2d, loss = %.2f',epochNumber,numberOfEpochs, totalLoss))
+
+
+end
+
+-------------------------------------------------------------------------
+-- Save network
+
+network:clearState();
+torch.save('networkOut.t7', network)
+
+
