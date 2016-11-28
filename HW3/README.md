@@ -26,6 +26,7 @@ the question number.
 
 ## Troubleshooting:
 
+### Issue #1: 
 * If you get the following error because of the makefile:  
 > ld: library not found for -lippicv  
 * This just means that ippicv is not found inside /usr/local/lib. To fix
@@ -35,3 +36,10 @@ this, please find "libippicv.a" in your system by running:
 link it to /usr/local/lib by running:  
 > ln -s OUTPUT_FIND /usr/local/lib/
 * Make sure to replace OUTPUT_FIND with the result in the previous step!
+
+### Issue #2:
+* If you get an error which says _"opencv not found"_ then go to terminal  
+and proceed as follows:
+> export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+* This is the path to opencv by default. Now you should be able to run  
+your code! 

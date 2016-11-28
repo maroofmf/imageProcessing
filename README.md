@@ -35,4 +35,6 @@ given below:
 * Salient Point extraction and description using SIFT and SURF
 * Image Matching using SIFT and SURF features
 
+####**HW3:**
+* CNN using torch
 
