@@ -51,7 +51,6 @@ public:
     double calculateDC(imageData inputImage);
     matrix<int,double> subtractDC(imageData inputImage);
     Mat energyPerPixel(matrix<int,double>* frame,int windowSize);
-    void imageSegmentation(imageData inputImage, int kValue);
 
     void saveSalientPoints(string inputFileName, string outputFileName);
     void featureMatching(Mat image1, Mat image2,string outputFileName, int thresh = 2);
