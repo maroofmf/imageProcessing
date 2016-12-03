@@ -12,6 +12,7 @@ require 'gnuplot'
 -------------------------------------------------------------------------
 -- Load training and testing DataSet
 
+collectgarbage();
 torch.manualSeed(0);
 training_dataSet = torch.load('mnist-p2b-train.t7');
 testing_dataSet = torch.load('mnist-p2b-test.t7');
@@ -92,7 +93,8 @@ function testData(epochNumber)
 	print(string.format('\27[34m Accuracy on Test Set = %.2f, Mean Accuracy Precision = %.2f',100*confusion_test.totalValid,100*confusion_test.averageValid))
 	epochAccuracy_test[1][epochNumber] = 100*confusion_test.totalValid
 	torch.save('metadata/confusion_test_color'..tostring(epochNumber)..'.t7',confusion_test)
-
+	collectgarbage();
+	return
 end
 
 -------------------------------------------------------------------------
@@ -128,6 +130,7 @@ for epochNumber = 1,numberOfEpochs do
 			local gradOutput = criterion:backward(networkOutput, labelBatch)
 			local gradInput = network:backward(trainingBatch,gradOutput)
 			confusion_train:batchAdd(networkOutput,labelBatch);
+			collectgarbage();
 			return errorValue,gradParams
 		end
 
@@ -135,6 +138,7 @@ for epochNumber = 1,numberOfEpochs do
 		optim.sgd(feval,modelParams, config)
 		io.write(string.format("\27[34m progress: %4d/%4d\r",iteration,trainingSize))
 		io.flush()
+		collectgarbage();
 	end
 
 	-- Compute total loss in training and state the accuracy
@@ -145,7 +149,8 @@ for epochNumber = 1,numberOfEpochs do
 	torch.save('metadata/confusion_train_color_'..tostring(epochNumber)..'.t7',confusion_train)
 
 	-- Compute accuracy on test data
---	testData(epochNumber)
+	testData(epochNumber)
+	collectgarbage();
 
 end
 
@@ -166,4 +171,4 @@ network:clearState();
 torch.save('models/trainedNet_color.t7', network)
 torch.save('metadata/trainAccuracy_color.t7',epochAccuracy_train)
 torch.save('metadata/testAccuracy_color.t7',epochAccuracy_test)
-
+collectgarbage();
