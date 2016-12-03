@@ -11,11 +11,19 @@ BLUE = \033[0;34m
 YELLOW = \033[1;33m
 
 # Code Execution:
-all: cnn_p1
+all: cnn_p1 cnn_p2 cnn_p3
 
 cnn_p1: setup
 	@printf "${YELLOW}=====> Training and Testing model from mnist-p1-train.t7\n ${NC}"
 	$(cc) cnn_p1.lua
+
+cnn_p2: setup
+	@printf "${YELLOW}=====> Training and Testing model from mnist-p1-train.t7\n ${NC}"
+	$(cc) cnn_p2.lua
+
+cnn_p3: setup
+	@printf "${YELLOW}=====> Training and Testing model from mnist-p2-train.t7\n ${NC}"
+	$(cc) cnn_p3.lua
 
 clean:
 	@printf "${RED}=====> Destroying folders\n ${NC}"

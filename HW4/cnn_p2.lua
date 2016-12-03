@@ -1,6 +1,6 @@
 -- Name: Maroof Mohammed Farooq
 -- Project 4
--- Train CNN
+-- CNN testing on negative image samples
 -------------------------------------------------------------------------
 -- Initialize packages
 
@@ -10,18 +10,33 @@ require 'image'
 require 'gnuplot'
 
 -------------------------------------------------------------------------
--- Load training and testing DataSet
+-- Loading Network and datasets:
 
-torch.manualSeed(0);
-training_dataSet = torch.load('mnist-p1b-train.t7');
-testing_dataSet = torch.load('mnist-p1b-test.t7');
-X_train = training_dataSet.data:double():mul(1/255);
-y_train = training_dataSet.label:double():clone();
-X_test = testing_dataSet.data:double():mul(1/255);
-y_test = testing_dataSet.label:double():clone();
+trainedNetwork = torch.load('models/trainedNet_1.t7');
+trainSet = torch.load('mnist-p1b-train.t7')
+testSet = torch.load('mnist-p1b-test.t7');
+X_train = trainSet.data:double():mul(1/255);
+y_train = trainSet.label:double();
+X_test = testSet.data:double():mul(1/255);
+y_test = testSet.label:double();
 
 -------------------------------------------------------------------------
--- Develop the network
+-- Predicting labels for negative samples
+
+function negativeSampleTest()
+
+	local classes = {'0','1','2','3','4','5','6','7','8','9'};
+	local confusion_negative = optim.ConfusionMatrix(classes);
+	local output = trainedNetwork:forward(X_test:clone():mul(-1):add(1));
+	confusion_negative:batchAdd(output,y_test);
+	confusion_negative:updateValids()
+	print(string.format('\27[34m Accuracy on negative test samples = %.2f, Mean Accuracy Precision = %.2f',100*confusion_negative.totalValid, 100* confusion_negative.averageValid))
+	torch.save('metadata/confusion_negative.t7',confusion_negative);
+end
+
+negativeSampleTest();
+---------------------------------------------------------------------------
+-- Develop the network for both negative and positive samples
 
 network = nn.Sequential();
 
@@ -57,12 +72,31 @@ network:add(nn.ReLU())
 network:add(nn.Linear(84,10));
 network:add(nn.LogSoftMax());
 
---print('LeNet-5 \n' .. network:__tostring());
-
 -------------------------------------------------------------------------
 -- Define cost function:
 
 criterion = nn.ClassNLLCriterion();
+
+-------------------------------------------------------------------------
+-- Develop data set for negative and positive samples
+
+X_train_negative = X_train:clone():mul(-1):add(1)
+y_train_negative = y_train:clone()
+X_test_negative = X_test:clone():mul(-1):add(1)
+y_test_negative = y_test:clone()
+
+X_train = torch.cat(X_train,X_train_negative,1)
+y_train = torch.cat(y_train, y_train_negative,1)
+X_test = torch.cat(X_test,X_test_negative,1)
+y_test = torch.cat(y_test,y_test_negative,1)
+
+perm1 = torch.randperm(X_train:size(1)):long()
+perm2 = torch.randperm(X_test:size(1)):long()
+
+X_train:index(1,perm1)
+y_train:index(1,perm1)
+X_test:index(1,perm2)
+y_test:index(1,perm2)
 
 -------------------------------------------------------------------------
 -- Define test-train system paramters:
@@ -72,8 +106,8 @@ trainingSize = X_train:size(1)
 modelParams,gradParams = network:getParameters()
 epochAccuracy_train = torch.DoubleTensor(1,numberOfEpochs);
 epochAccuracy_test = torch.DoubleTensor(1,numberOfEpochs);
-batchSize = 10;
-config = {learningRate = 0.06, momentum = 0.9}
+batchSize = 50;
+config = {learningRate = 0.06}
 
 -------------------------------------------------------------------------
 -- Testing
@@ -91,7 +125,7 @@ function testData(epochNumber)
 	confusion_test:updateValids()
 	print(string.format('\27[34m Accuracy on Test Set = %.2f, Mean Accuracy Precision = %.2f',100*confusion_test.totalValid,100*confusion_test.averageValid))
 	epochAccuracy_test[1][epochNumber] = 100*confusion_test.totalValid
-	torch.save('metadata/confusion_test_'..tostring(epochNumber)..'.t7',confusion_test)
+	torch.save('metadata/confusion_mixed_'..tostring(epochNumber)..'.t7',confusion_test)
 
 end
 
@@ -101,6 +135,7 @@ end
 for epochNumber = 1,numberOfEpochs do
 
 	totalLoss = 0;
+	sign = 0;
 
 	-- Confusion matrix
 	classes = {'0','1','2','3','4','5','6','7','8','9'}
@@ -143,7 +178,7 @@ for epochNumber = 1,numberOfEpochs do
 	confusion_train:updateValids()
 	print(string.format('\27[34m epoch = %2d/%2d, loss = %.2f, accuracy = %.2f, mean accuracy precision = %.2f',epochNumber,numberOfEpochs, totalLoss, 100*confusion_train.totalValid, 100*confusion_train.averageValid))
 	epochAccuracy_train[1][epochNumber] = 100*confusion_train.totalValid;
-	torch.save('metadata/confusion_train_'..tostring(epochNumber)..'.t7',confusion_train)
+	torch.save('metadata/confusion_train_mixed_'..tostring(epochNumber)..'.t7',confusion_train)
 
 	-- Compute accuracy on test data
 	testData(epochNumber)
@@ -154,7 +189,7 @@ end
 -- Plotting epoch - accuracy results:
 
 epochs = torch.linspace(1,numberOfEpochs,numberOfEpochs)
-gnuplot.pdffigure('plots/training_1.pdf')
+gnuplot.pdffigure('plots/training_2.pdf')
 gnuplot.plot({'Training',epochs,epochAccuracy_train[1]},{'Testing',epochs,epochAccuracy_test[1]})
 gnuplot.xlabel('Epochs')
 gnuplot.ylabel('Accuracy')
@@ -164,7 +199,6 @@ gnuplot.plotflush()
 -- Save network and accuracy values
 
 network:clearState();
-torch.save('models/trainedNet_1.t7', network)
-torch.save('metadata/trainAccuracy.t7',epochAccuracy_train)
-torch.save('metadata/testAccuracy.t7',epochAccuracy_test)
-
+torch.save('models/trainedNet_mixed.t7', network)
+torch.save('metadata/trainAccuracy_mixed.t7',epochAccuracy_train)
+torch.save('metadata/testAccuracy_mixed.t7',epochAccuracy_test)

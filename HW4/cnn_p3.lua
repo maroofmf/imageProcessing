@@ -1,6 +1,6 @@
 -- Name: Maroof Mohammed Farooq
 -- Project 4
--- Train CNN
+-- CNN testing on color background!
 -------------------------------------------------------------------------
 -- Initialize packages
 
@@ -13,8 +13,8 @@ require 'gnuplot'
 -- Load training and testing DataSet
 
 torch.manualSeed(0);
-training_dataSet = torch.load('mnist-p1b-train.t7');
-testing_dataSet = torch.load('mnist-p1b-test.t7');
+training_dataSet = torch.load('mnist-p2b-train.t7');
+testing_dataSet = torch.load('mnist-p2b-test.t7');
 X_train = training_dataSet.data:double():mul(1/255);
 y_train = training_dataSet.label:double():clone();
 X_test = testing_dataSet.data:double():mul(1/255);
@@ -26,10 +26,10 @@ y_test = testing_dataSet.label:double():clone();
 network = nn.Sequential();
 
 -- View Layer:
-network:add(nn.View(1,32,32))
+network:add(nn.View(3,32,32))
 
 -- First Layer
-network:add(nn.SpatialConvolution(1,6,5,5));
+network:add(nn.SpatialConvolution(3,6,5,5));
 network:add(nn.SpatialMaxPooling(2,2,2,2))
 network:add(nn.ReLU());
 --network:add(nn.Dropout(0.1))
@@ -46,15 +46,15 @@ network:add(nn.View(16*5*5))
 -- Fully Connected Layer 1:
 network:add(nn.Linear(16*5*5,120))
 network:add(nn.ReLU())
---network:add(nn.Dropout(0.2))
+--network:add(nn.Dropout(0.4))
 
 -- Fully Connected Layer 1:
 network:add(nn.Linear(120,84))
 network:add(nn.ReLU())
---network:add(nn.Dropout(0.2))
+--network:add(nn.Dropout(0.4))
 
 -- Output Layer:
-network:add(nn.Linear(84,10));
+network:add(nn.Linear(84,11));
 network:add(nn.LogSoftMax());
 
 --print('LeNet-5 \n' .. network:__tostring());
@@ -67,7 +67,7 @@ criterion = nn.ClassNLLCriterion();
 -------------------------------------------------------------------------
 -- Define test-train system paramters:
 
-numberOfEpochs = 7;
+numberOfEpochs = 15;
 trainingSize = X_train:size(1)
 modelParams,gradParams = network:getParameters()
 epochAccuracy_train = torch.DoubleTensor(1,numberOfEpochs);
@@ -82,7 +82,7 @@ config = {learningRate = 0.06, momentum = 0.9}
 function testData(epochNumber)
 
 	-- Confusion matrix
-	local classes = {'0','1','2','3','4','5','6','7','8','9'}
+	local classes = {'0','1','2','3','4','5','6','7','8','9','NC'}
 	local confusion_test = optim.ConfusionMatrix(classes);
 
 	-- Compute:
@@ -91,7 +91,7 @@ function testData(epochNumber)
 	confusion_test:updateValids()
 	print(string.format('\27[34m Accuracy on Test Set = %.2f, Mean Accuracy Precision = %.2f',100*confusion_test.totalValid,100*confusion_test.averageValid))
 	epochAccuracy_test[1][epochNumber] = 100*confusion_test.totalValid
-	torch.save('metadata/confusion_test_'..tostring(epochNumber)..'.t7',confusion_test)
+	torch.save('metadata/confusion_test_color'..tostring(epochNumber)..'.t7',confusion_test)
 
 end
 
@@ -103,9 +103,8 @@ for epochNumber = 1,numberOfEpochs do
 	totalLoss = 0;
 
 	-- Confusion matrix
-	classes = {'0','1','2','3','4','5','6','7','8','9'}
+	classes = {'0','1','2','3','4','5','6','7','8','9','NC'}
 	confusion_train = optim.ConfusionMatrix(classes)
-	confusion_test = optim.ConfusionMatrix(classes);
 
 	-- Data shuffling:
 	perm = torch.randperm(X_train:size(1)):long()
@@ -143,10 +142,10 @@ for epochNumber = 1,numberOfEpochs do
 	confusion_train:updateValids()
 	print(string.format('\27[34m epoch = %2d/%2d, loss = %.2f, accuracy = %.2f, mean accuracy precision = %.2f',epochNumber,numberOfEpochs, totalLoss, 100*confusion_train.totalValid, 100*confusion_train.averageValid))
 	epochAccuracy_train[1][epochNumber] = 100*confusion_train.totalValid;
-	torch.save('metadata/confusion_train_'..tostring(epochNumber)..'.t7',confusion_train)
+	torch.save('metadata/confusion_train_color_'..tostring(epochNumber)..'.t7',confusion_train)
 
 	-- Compute accuracy on test data
-	testData(epochNumber)
+--	testData(epochNumber)
 
 end
 
@@ -154,7 +153,7 @@ end
 -- Plotting epoch - accuracy results:
 
 epochs = torch.linspace(1,numberOfEpochs,numberOfEpochs)
-gnuplot.pdffigure('plots/training_1.pdf')
+gnuplot.pdffigure('plots/training_3.pdf')
 gnuplot.plot({'Training',epochs,epochAccuracy_train[1]},{'Testing',epochs,epochAccuracy_test[1]})
 gnuplot.xlabel('Epochs')
 gnuplot.ylabel('Accuracy')
@@ -164,7 +163,7 @@ gnuplot.plotflush()
 -- Save network and accuracy values
 
 network:clearState();
-torch.save('models/trainedNet_1.t7', network)
-torch.save('metadata/trainAccuracy.t7',epochAccuracy_train)
-torch.save('metadata/testAccuracy.t7',epochAccuracy_test)
+torch.save('models/trainedNet_color.t7', network)
+torch.save('metadata/trainAccuracy_color.t7',epochAccuracy_train)
+torch.save('metadata/testAccuracy_color.t7',epochAccuracy_test)
 
