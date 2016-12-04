@@ -26,8 +26,12 @@ cnn_p3: setup
 	$(cc) cnn_p3.lua
 
 cnn_p4: setup
-	@printf "${YELLOW}=====> Testing model 1 for translation invariance and training for roboustness ${NC}"
-    $(cc) cnn_p4.lua
+	@printf "${YELLOW}=====> Testing model 1 for translation invariance ${NC}"
+	$(cc) cnn_p4.lua
+
+cnn_p5: setup
+	@printf "${YELLOW}=====> Training model for translation invariance ${NC}"
+	$(cc) cnn_p5.lua
 
 clean:
 	@printf "${RED}=====> Destroying folders\n ${NC}"
