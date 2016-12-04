@@ -16,7 +16,7 @@ collectgarbage();
 torch.manualSeed(0);
 training_dataSet = torch.load('mnist-p1b-train.t7');
 testing_dataSet = torch.load('mnist-p1b-test.t7');
-network = torch.load('models/trainedNet_translated.t7');
+network = torch.load('models/trainedNet_1.t7');
 X_train = training_dataSet.data:double():mul(1/255);
 y_train = training_dataSet.label:double():clone();
 X_test = testing_dataSet.data:double():mul(1/255);

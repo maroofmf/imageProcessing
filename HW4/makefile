@@ -11,7 +11,7 @@ BLUE = \033[0;34m
 YELLOW = \033[1;33m
 
 # Code Execution:
-all: cnn_p1 cnn_p2 cnn_p3 cnn_p4
+all: cnn_p1 cnn_p2 cnn_p3 cnn_p4 cnn_p5
 
 cnn_p1: setup
 	@printf "${YELLOW}=====> Training and Testing model from mnist-p1-train.t7\n ${NC}"
