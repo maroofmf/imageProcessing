@@ -36,5 +36,9 @@ given below:
 * Image Matching using SIFT and SURF features
 
 ####**HW3:**
-* CNN using torch
+* Training and Testing LeNet-5 on MNIST dataset.
+* Boosting performance of LeNet-5 on negative images.
+* Training and testing LeNet-5 on color image dataset.
+* Testing for translational invariance. 
+
 
