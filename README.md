@@ -35,7 +35,7 @@ given below:
 * Salient Point extraction and description using SIFT and SURF
 * Image Matching using SIFT and SURF features
 
-####**HW3:**
+####**HW4:**
 * Training and Testing LeNet-5 on MNIST dataset.
 * Boosting performance of LeNet-5 on negative images.
 * Training and testing LeNet-5 on color image dataset.
