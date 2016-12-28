@@ -42,4 +42,5 @@ Upda
 * To clean all the folders and object files in the folder run:       
 > make clean
 * The output models are stored in models folder created by the program.  
-* Input and output images are in .t7 format.
+* Input and output images als
+in .t7 format.

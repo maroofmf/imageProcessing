@@ -135,7 +135,7 @@ local function w_init(net, arg)
 	return net
 end
 
-network = w_init(network,'xavier')
+--network = w_init(network,'kaiming')
 -------------------------------------------------------------------------
 -- Define test-train system paramters:
 
