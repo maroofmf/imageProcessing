@@ -29,12 +29,12 @@
     * Plotting accuracy vs translational invariances on testing data.
     
 * cnn_p5:
-Upda
+    * Training and testing LeNet-5 for translational invariance.
  
 ## Guidelines for running the code:
  
 * This code uses torch. Make sure you have installed the latest version  
- of torch on your machine. 
+ of torch on your machine.
 * The input data (mnist test and train) must be contained in the source  
   folder.
 * To compile and start training just type:   
